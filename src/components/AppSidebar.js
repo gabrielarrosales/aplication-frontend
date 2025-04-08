@@ -13,8 +13,11 @@ import CIcon from '@coreui/icons-react'
 
 import { AppSidebarNav } from './AppSidebarNav'
 
-import { logo } from 'src/assets/brand/logo'
-import { sygnet } from 'src/assets/brand/sygnet'
+/*import { logo } from 'src/assets/brand/logo'
+import { sygnet } from 'src/assets/brand/sygnet'*/
+
+//aqui añado mi logo
+import logoAdminBeauty from 'src/assets/images/logo_AdminBeauty.png'  
 
 // sidebar nav config
 import navigation from '../_nav'
@@ -35,11 +38,15 @@ const AppSidebar = () => {
         dispatch({ type: 'set', sidebarShow: visible })
       }}
     >
+
       <CSidebarHeader className="border-bottom">
-        <CSidebarBrand to="/">
-          <CIcon customClassName="sidebar-brand-full" icon={logo} height={32} />
-          <CIcon customClassName="sidebar-brand-narrow" icon={sygnet} height={32} />
-        </CSidebarBrand>
+
+      {/* aqui utilizo mi logo */}
+      <CSidebarBrand to="/">
+        <img src={logoAdminBeauty} alt="Admin Beauty Logo" height={100}  />
+      </CSidebarBrand>
+      {/* hasta aqui */}
+
         <CCloseButton
           className="d-lg-none"
           dark
