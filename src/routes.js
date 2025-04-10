@@ -1,3 +1,4 @@
+import { element } from 'prop-types'
 import React from 'react'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
@@ -51,6 +52,13 @@ const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
 
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
+//const añadidos por mi
+
+const Services = React.lazy(() => import('./views/pages/services/Services'));
+const Calendar = React.lazy (() => import('./views/pages/calendar/Calendar') );
+const Users = React.lazy (() => import('./views/pages/users/Users'));
+const Stock = React.lazy(() => import('./views/pages/stock/Stock'));
+
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
@@ -97,6 +105,14 @@ const routes = [
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   { path: '/widgets', name: 'Widgets', element: Widgets },
+
+  //ruta añadida por mi
+
+  { path: '/services', name: 'Services', element: Services },
+  { path: '/calendar', name: 'Calendar', element: Calendar},
+  { path: '/users', name: 'Users', element: Users},
+  { path: '/stock', name: 'Stock', element: Stock},
+  
 ]
 
 export default routes
