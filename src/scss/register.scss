@@ -1,0 +1,42 @@
+.container_box{
+    background-color:rgb(160, 57, 143);
+    height: 100vh;
+    background-image: url("src/views/pages/register/—Pngtree—line drawing plant magnolia flower_5406078.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    
+    
+
+}
+
+.buttom_create{ 
+position: relative;
+left: 35%;
+border: 1px solid #1b2631;
+background: #992c75;
+color: white;
+cursor: pointer;
+
+transition: .3s;
+
+    &:hover{
+        color: #000000;
+        background:rgb(255, 158, 231);
+    }
+
+}
+
+.carta{
+margin: 18px 0px 0px 0px;
+}
+
+.title{
+position: relative;
+left: 35%;
+}
+
+.subtitle{
+position: relative;
+    left: 35%;
+}

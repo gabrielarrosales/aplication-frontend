@@ -14,17 +14,35 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
+import "src/scss/register.scss"
+
 const Register = () => {
   return (
-    <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+
+
+    <div className="container_box" >
       <CContainer>
         <CRow className="justify-content-center">
           <CCol md={9} lg={7} xl={6}>
-            <CCard className="mx-4">
+            <CCard className="carta">
               <CCardBody className="p-4">
                 <CForm>
-                  <h1>Register</h1>
-                  <p className="text-body-secondary">Create your account</p>
+                  <h1 className='title'>Register</h1>
+                  <p className="subtitle">Create your account</p>
+                  <CInputGroup className="mb-3">
+                    <CInputGroupText>
+                      <CIcon icon={cilUser} />
+                    </CInputGroupText>
+                    <CFormInput placeholder="First Name" autoComplete="username" />
+                  </CInputGroup>
+
+                  <CInputGroup className="mb-3">
+                    <CInputGroupText>
+                      <CIcon icon={cilUser} />
+                    </CInputGroupText>
+                    <CFormInput placeholder="Last Name" autoComplete="username" />
+                  </CInputGroup>
+
                   <CInputGroup className="mb-3">
                     <CInputGroupText>
                       <CIcon icon={cilUser} />
@@ -55,8 +73,8 @@ const Register = () => {
                       autoComplete="new-password"
                     />
                   </CInputGroup>
-                  <div className="d-grid">
-                    <CButton color="success">Create Account</CButton>
+                  <div>
+                    <CButton className="buttom_create">Create Account</CButton>
                   </div>
                 </CForm>
               </CCardBody>
@@ -65,7 +83,10 @@ const Register = () => {
         </CRow>
       </CContainer>
     </div>
+
+    
+
   )
 }
 
-export default Register
+export default Register

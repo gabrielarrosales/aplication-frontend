@@ -1,4 +1,4 @@
-import React from 'react'
+import React ,{useState} from 'react'
 import { Link } from 'react-router-dom'
 import {
   CButton,
@@ -12,13 +12,39 @@ import {
   CInputGroup,
   CInputGroupText,
   CRow,
+  CModal,
+  CModalHeader,
+  CModalBody,
+  CModalFooter,
+  CFormLabel,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
 const Login = () => {
+
+  const [visible,setvisible] = useState(false)
+
+
   return (
-    //div que contiene el login 
+
+    <>
+    <CModal visible={visible} onClose={()=>setvisible(false)}>
+      <CModalHeader>Forgot Password</CModalHeader>
+      <CModalBody>
+      Enter your email address to recover your password:
+        <CForm>
+          <CFormInput
+          type='email'
+          placeholder='Email'
+          ></CFormInput>
+        </CForm>
+      </CModalBody>
+      <CModalFooter></CModalFooter>
+    </CModal>
+
+
+    {/*div que contiene el login*/} 
     <div className="min-vh-100 d-flex flex-row align-items-center"  style={{ backgroundColor: '#FFF0F5',bfontFamily: "'Arial', sans-serif"}}  >
       <CContainer>
         <CRow className="justify-content-center">
@@ -57,7 +83,7 @@ const Login = () => {
                         </CButton>
                       </CCol>
                       <CCol xs={6} className="text-right">
-                          <CButton color="link" className="px-0" style={{color: '#A58AAE'}}>
+                          <CButton  onClick={()=>setvisible(true)} color="link" className="px-0" style={{color: '#A58AAE'}}>
                             Forgot password?
                           </CButton>
                       </CCol>
@@ -89,7 +115,7 @@ const Login = () => {
       </CContainer>
     </div>
 
-    
+    </>
   )
 }
 
