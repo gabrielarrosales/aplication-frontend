@@ -20,9 +20,9 @@ const Stock = () => {
   const [stockItems, setStockItems] = useState([
     {
       name: 'Shampoo',
-      description: 'Hair cleansing product', // Cambiado de 'Description' a 'description'
-      amount: 50,                            // Cambiado de 'Amount' a 'amount'
-      date: '2025-04-01',                    // Cambiado de 'Date' a 'date'
+      description: 'Hair cleansing product',
+      amount: 50,                            
+      date: '2025-04-01',                    
     },
     {
       name: 'Hair Dryer',
@@ -175,6 +175,8 @@ const Stock = () => {
                     <CTableHeaderCell>Description</CTableHeaderCell>
                     <CTableHeaderCell>Amount</CTableHeaderCell>
                     <CTableHeaderCell>Date</CTableHeaderCell>
+                    <CTableHeaderCell></CTableHeaderCell>
+                    <CTableHeaderCell></CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
@@ -187,21 +189,17 @@ const Stock = () => {
                       <CTableDataCell>{item.date}</CTableDataCell>
                       <CTableDataCell>
                         <CButton
-                          className='button-inventory'
-                          onClick={() => Navigate(`/inventory/${index}`)}
-                        > <CIcon icon={cibDropbox} /> </CButton>
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <CButton
                           className='button-edit'
-                          onClick={() => editRegister(index)}
-                        > <CIcon icon={cilPencil} /> </CButton>
+                          onClick={() => editRegister(index)} 
+                          color='success'
+                        >Edit</CButton>
                       </CTableDataCell>
                       <CTableDataCell>
                         <CButton
                           className='button-delete'
                           onClick={() => handleDelete(index)}
-                        > <CIcon icon={cilX} /> </CButton>
+                          color='danger'
+                        >delete</CButton>
                       </CTableDataCell>
                     </CTableRow>
                   ))}
