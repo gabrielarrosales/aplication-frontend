@@ -1,0 +1,18 @@
+.button_add {
+    display: flex;
+    background-color: #e4698e;
+    color: black;
+    border:solid 1px black;
+    padding: 10px 15px;
+    font-size: 15px;
+    margin: 4px 0px 15px;
+    cursor: pointer;
+    border-radius: 15px; 
+    transition: 0.3s;
+
+    &:hover {
+        background-color: #db4672;
+        color: black;
+        transform: scale(1.15)
+    }
+}
