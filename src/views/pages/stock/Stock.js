@@ -108,7 +108,6 @@ const Stock = () => {
                     setModalVisible(true); 
                     setIsEditing(false);
                   }}
-              
               >Add <CIcon icon={cilPlus} /> </CButton>
             <CModal visible={modalVisible} onClose={() => setModalVisible(false)}>
               <CModalHeader className='Modal-header'>Add New Stock Item</CModalHeader>
