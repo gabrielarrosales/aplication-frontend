@@ -58,10 +58,12 @@ const Register = () => {
                     />
                   </CInputGroup>
                   <div className="d-grid">
-                    <CButton style={{ backgroundColor: '#FF6B98' }}>Create Account</CButton>
+                    <CButton style={{ backgroundColor: '#FF6B98' }}>
+                      Create Account
+                      </CButton>
                     <CButton   style={{ color: '#A58AAE' }}>
                         Already have an account? Login
-                      </CButton>
+                    </CButton>
                   </div>
                 </CForm>
               </CCardBody>
