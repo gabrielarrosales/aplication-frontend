@@ -18,8 +18,10 @@ CTableDataCell,
 CInputGroup
 } from '@coreui/react';
 
-//estos son los estados iniciales para el formulario
+
 const AddAppointment = () => {
+
+//estos son los estados iniciales para el formulario
 const [formData, setFormData] = useState({
     clientName: '',
     service: '',
@@ -45,12 +47,13 @@ const handleSubmit = (e) => {
     
     e.preventDefault();
 
-    //para crear el nuevo dato que se enviara 
+    //para crear nueva cita
     const newAppointment = {
     id: appointments.length + 1,
     ...formData //copia todos los datos del formulario
     };
 
+    //actualiza el listado de las citas
     setAppointments([...appointments, newAppointment]); //aqui toma las citas existentes ...apointments y le agrega la nueva
     setFormData({ clientName: '', service: '', date: '', time: '', status: 'pending' });//reinicio
 };
@@ -60,7 +63,7 @@ const filteredAppointments = sampleData.filter(appointment => {
     const matchesSearch = appointment.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         appointment.service.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || appointment.status === filterStatus;
-    const matchesDate = !filterDate || appointment.date === filterDate; // Nuevo filtro por fecha
+    const matchesDate = !filterDate || appointment.date === filterDate;
     
     return matchesSearch && matchesStatus && matchesDate;
 });
@@ -127,89 +130,89 @@ return (
                 </CRow>
             </CForm>
 
-        {/* Filtros y Tabla */}
+
         <div className="mt-5">
-          <CRow className="mb-3 g-3">
-            <CCol md={4}>
-              <CInputGroup>
-                <CFormInput
-                  placeholder="Buscar por nombre o servicio..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </CInputGroup>
-            </CCol>
+            <CRow className="mb-3 g-3">
+                <CCol md={4}>
+                    <CInputGroup>
+                        <CFormInput
+                            placeholder="Buscar por nombre o servicio..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </CInputGroup>
+                </CCol>
             
-            <CCol md={2}>
-              <CFormSelect
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="all">Todos los estados</option>
-                <option value="pending">Pendiente</option>
-                <option value="completed">Completado</option>
-              </CFormSelect>
-            </CCol>
+                <CCol md={2}>
+                    <CFormSelect
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                        >
+                        <option value="all">Todos los estados</option>
+                        <option value="pending">Pendiente</option>
+                        <option value="completed">Completado</option>
+                    </CFormSelect>
+                </CCol>
 
-            {/* Nuevo filtro por fecha */}
-            <CCol md={3}>
-              <CFormInput
-                type="date"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                placeholder="Filtrar por fecha"
-              />
-            </CCol>
+            
+                <CCol md={3}>
+                    <CFormInput
+                        type="date"
+                        value={filterDate}
+                        onChange={(e) => setFilterDate(e.target.value)}
+                        placeholder="Filtrar por fecha"
+                    />
+                </CCol>
 
-            <CCol md={3} className="text-end">
-              <CButton 
-                color="secondary" 
-                onClick={() => {
-                  setSearchTerm('');
-                  setFilterStatus('all');
-                  setFilterDate('');
-                }}
-              >
-                Limpiar Filtros
-              </CButton>
-            </CCol>
-          </CRow>
+                <CCol md={3} className="text-end">
+                    <CButton 
+                        color="secondary" 
+                        onClick={() => {
+                        setSearchTerm('');
+                        setFilterStatus('all');
+                        setFilterDate('');
+                        }}
+                    >
+                    Clean
+                    </CButton>
+                </CCol>
+            </CRow>
 
-          <CTable striped hover responsive>
+        <CTable striped hover responsive>
             <CTableHead>
-              <CTableRow>
-                <CTableHeaderCell>Cliente</CTableHeaderCell>
-                <CTableHeaderCell>Servicio</CTableHeaderCell>
-                <CTableHeaderCell>Fecha</CTableHeaderCell>
-                <CTableHeaderCell>Hora</CTableHeaderCell>
-                <CTableHeaderCell>Estado</CTableHeaderCell>
-                <CTableHeaderCell>Acciones</CTableHeaderCell>
-              </CTableRow>
+                <CTableRow>
+                    <CTableHeaderCell>Client</CTableHeaderCell>
+                    <CTableHeaderCell>Service</CTableHeaderCell>
+                    <CTableHeaderCell>Date</CTableHeaderCell>
+                    <CTableHeaderCell>Hour</CTableHeaderCell>
+                    <CTableHeaderCell>Status</CTableHeaderCell>
+                    <CTableHeaderCell>Accions</CTableHeaderCell>
+                </CTableRow>
             </CTableHead>
             
             <CTableBody>
-              {filteredAppointments.map(appointment => (
-                <CTableRow key={appointment.id}>
-                  <CTableDataCell>{appointment.client}</CTableDataCell>
-                  <CTableDataCell>{appointment.service}</CTableDataCell>
-                  <CTableDataCell>{appointment.date}</CTableDataCell>
-                  <CTableDataCell>{appointment.time}</CTableDataCell>
-                  <CTableDataCell>
-                    <span className={`badge bg-${appointment.status === 'pending' ? 'warning' : 'success'}`}>
-                      {appointment.status}
-                    </span>
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <CButton color="danger" size="sm">Eliminar</CButton>
-                  </CTableDataCell>
-                </CTableRow>
-              ))}
+                {filteredAppointments.map(appointment => (
+                    <CTableRow key={appointment.id}>
+                        <CTableDataCell>{appointment.client}</CTableDataCell>
+                        <CTableDataCell>{appointment.service}</CTableDataCell>
+                        <CTableDataCell>{appointment.date}</CTableDataCell>
+                        <CTableDataCell>{appointment.time}</CTableDataCell>
+                        <CTableDataCell>
+                            <span className={`badge bg-${appointment.status === 'pending' ? 'warning' : 'success'}`}>
+                                {appointment.status}
+                            </span>
+                        </CTableDataCell>
+                        <CTableDataCell>
+                            <CButton color="danger" size="sm">Delete</CButton>
+                        </CTableDataCell>
+                    </CTableRow>
+                ))}
             </CTableBody>
-          </CTable>
+        </CTable>
         </div>
-      </CCardBody>
+        </CCardBody>
     </CCard>
-  );
+);
 };
 
 export default AddAppointment;
