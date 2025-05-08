@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
 CCard,
 CCardBody,
-CCardHeader,
 CTable,
 CTableHead,
 CTableRow,
@@ -39,7 +38,7 @@ const [formData, setFormData] = useState({
 });
 
 useEffect(() => {
-    fetch('http://localhost:5000/users')
+    fetch('http://localhost:5000/uses')
         .then((response) => response.json())
         .then((data) => {
         setUsers(data);
@@ -66,7 +65,7 @@ const filteredUsers = users.filter(user => {
     return matchesSearch && matchesRole && matchesDate;
 });
 
-const handleSubmit = (e) => {
+const handleSbmit = (e) => {
     e.preventDefault();
     const newUser = {
         username: formData.ClientUserName,
