@@ -1,0 +1,116 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "juanperez",
+      "firstName": "Juan",
+      "lastName": "Pérez",
+      "email": "juan@gmail.com",
+      "phone": "04121234567",
+      "address": "Av. Principal, Caracas",
+      "role": "cliente",
+      "registrationDate": "2025-03-27"
+    },
+    {
+      "id": "2",
+      "username": "mariagarcia",
+      "firstName": "María",
+      "lastName": "García",
+      "email": "maria@gmail.com",
+      "phone": "04243334455",
+      "address": "Calle Bolívar, Valencia",
+      "role": "empleado",
+      "registrationDate": "2025-01-03"
+    },
+    {
+      "id": "3",
+      "username": "anaperez",
+      "firstName": "Ana",
+      "lastName": "Perez",
+      "email": "ana@gmail.com",
+      "phone": "04127787813",
+      "address": "Av. Libertador",
+      "role": "empleado",
+      "registrationDate": "2025-02-28"
+    },
+    {
+      "id": "4",
+      "username": "cesar",
+      "firstName": "cesar",
+      "lastName": "cesar41",
+      "email": "cesar@gmail.com",
+      "phone": "04122720967",
+      "address": "casa",
+      "role": "empleado",
+      "registrationDate": "2025-05-10"
+    }
+  ],
+  "stockItems": [
+    {
+      "id": "1",
+      "name": "Shampoo Anticaspa",
+      "amount": 15,
+      "date": "2024-05-20"
+    },
+    {
+      "id": "2",
+      "name": "Crema Hidratante",
+      "amount": 8,
+      "date": "2024-05-21"
+    },
+    {
+      "id": "3",
+      "name": "Tinte Rubio Medio",
+      "amount": 5,
+      "date": "2024-05-22"
+    },
+    {
+      "id": "4",
+      "name": "Esmalte Semipermante",
+      "amount": 12,
+      "date": "2024-05-23"
+    },
+    {
+      "id": "9d22",
+      "name": "crema de manos",
+      "amount": 3,
+      "date": "2025-05-07"
+    }
+  ],
+  "appointments": [
+    {
+      "id": "2",
+      "clientName": "María García",
+      "service": "Color",
+      "date": "2024-05-21",
+      "time": "14:30",
+      "status": "completed"
+    },
+    {
+      "id": "1e9a",
+      "clientName": "cesar",
+      "service": "Corte",
+      "date": "2025-05-09",
+      "time": "15:30",
+      "status": "pending"
+    }
+  ],
+  "services": [
+    {
+      "id": 1,
+      "name": "Gold Facial",
+      "category": "Facial",
+      "type": "Premium",
+      "duration": "01:00:00",
+      "price": 10
+    },
+    {
+      "id": 2,
+      "name": "Basic hydration",
+      "category": "Hair",
+      "type": "Basic",
+      "duration": "00:30:00",
+      "price": 15
+    }
+  ]
+}

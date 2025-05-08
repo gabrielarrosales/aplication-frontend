@@ -16,7 +16,8 @@
     "build": "vite build",
     "lint": "eslint",
     "serve": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "json-server": "json-server --watch db.json --port 5000"
   },
   "dependencies": {
     "@coreui/chartjs": "^4.1.0",
@@ -49,6 +50,7 @@
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.1.0",
     "globals": "^15.15.0",
+    "json-server": "^1.0.0-beta.3",
     "postcss": "^8.5.2",
     "prettier": "3.5.1",
     "sass": "^1.85.0",

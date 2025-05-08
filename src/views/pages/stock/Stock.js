@@ -1,148 +1,292 @@
-import React from 'react'
-import{
-CCard, //lo que contiene a todos
-CCardHeader, //el titulo 
-CCardBody, //el cuerpo
-CTable, //el contenedor de la tabla
-CTableHead, //el titulo de la tabla
-CTableHeaderCell, //para colocar los nombres de las columnas
-CTableBody, //cuerpo de la tabla
-CTableDataCell, //para colocar los datos de las columnas
-CTableRow, //para añadir una fila
-CFormInput, //barrita para ingresar datos
+import React, { useState, useEffect } from 'react';
+import {
+CCard,
+CCardBody,
+CCardHeader,
+CTable,
+CTableHead,
+CTableRow,
+CTableHeaderCell,
+CTableBody,
+CTableDataCell,
 CButton,
-CFormSelect,
-CForm,
+CFormInput,
 CRow,
 CCol,
+CForm,
+CInputGroup,
+CModal,
+CModalHeader, 
+CModalTitle, 
+CModalBody,
+} from '@coreui/react';
 
-CInputGroup, //contenedor
-CInputGroupText,// para colocar boton simple
-CDropdown, 
-CDropdownToggle, 
-CDropdownMenu,
-CDropdownItem,
-}from '@coreui/react';
+const Stock = () => {
+
+const [stockItems, setStockItems] = useState([]);
+const [formData, setFormData] = useState({
+    productName: '',
+    amount: '',
+    date: ''
+});
+
+useEffect(() => {
+    fetch('http://localhost:5000/stockItems')
+      .then((response) => response.json())
+      .then((data) => {
+        setStockItems(data);
+      })
+      .catch((error) => {
+        console.error('Error al cargar los items del stock:', error);
+      });
+  }, []);
 
 
-const Services = () => {
-    function formatCurrency(value, currency) {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterDate, setFilterDate] = useState('');
 
-        return `${currency ?? "$"} ${value.toFixed(2)}`;
-    }
+
+    const filteredStock = stockItems.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesDate = !filterDate || item.date === filterDate;
+        
+        return matchesSearch && matchesDate;
+    });
+
+
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            const newItem = {
+                name: formData.productName,
+                amount: parseInt(formData.amount),
+                date: formData.date,
+            };
+
+            fetch('http://localhost:5000/stockItems', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newItem),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                setStockItems([...stockItems, data]);
+                setFormData({
+                productName: '',
+                amount: '',
+                date: '',
+                });
+            })
+            .catch((error) => {
+                console.error('Error al agregar el producto al stock:', error);
+            });
+        };
+
+    
+        const handleDelete = (id) => {
+            console.log(`Intentando eliminar el item con ID: ${id}`);
+            if (window.confirm('¿Estás seguro de eliminar este item del stock?')) {
+            fetch(`http://localhost:5000/stockItems/${id}`, {
+                method: 'DELETE',
+            })
+                .then(() => {
+                setStockItems(stockItems.filter((item) => item.id !== id));
+                })
+                .catch((error) => {
+                console.error('Error al eliminar el producto del stock:', error);
+                });
+            }
+        };
+
+    const [editingItem, setEditingItem] = useState(null);
+    const [visibleModal, setVisibleModal] = useState(false);
+    const handleEdit = (item) => {
+        setEditingItem(item);
+        setVisibleModal(true);
+    };
+
+const handleUpdate = (e) => {
+  e.preventDefault();
+
+
+  fetch(`http://localhost:5000/stockItems/${editingItem.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(editingItem),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      setStockItems(stockItems.map((item) => (item.id === data.id ? data : item)));
+      setVisibleModal(false);
+      setEditingItem(null);
+    })
+    .catch((error) => {
+      console.error('Error al actualizar el producto:', error);
+    });
+};
 
     return (
-        <>
-            <CCard>
-                <CCardHeader className= "mb-4">
-                        <h5 className="mb-0">Services</h5>  
-                </CCardHeader>
+        <CCard className="mb-4">
+        <CCardHeader>
+            <h5 className="mb-0">Stock</h5>
+        </CCardHeader>
 
-                <CCardBody>
-                        <CForm >
-                            <CRow className="g-3">
-                                <CCol md={6}>
-                                    <CFormInput
-                                        label="Client name"
-                                        placeholder="name"
-                                        required
-                                        />
-                                </CCol>
-                    
-                                <CCol md={6}>
-                                    <CFormSelect
-                                        label="Service"
-                                        required
-                                    >
-                                        <option value="">Select a service</option>
-                                        <option value="Corte">Corte</option>
-                                        <option value="Color">Color</option>
-                                        <option value="Tratamiento">Tratamiento</option>
-                                    </CFormSelect>
-                                </CCol>
-                    
-                                <CCol md={3}>
-                                    <CFormInput
-                                        type="date"
-                                        label="Date"
-                                        required
-                                    />
-                                </CCol>
-                    
-                                <CCol md={3}>
-                                    <CFormInput
-                                        type="time"
-                                        label="Time"
-                                        required
-                                    />
-                                </CCol>
-                    
-                                <CCol md={12} className="text-end">
-                                    <CButton type="submit" color="primary">Agendar Cita</CButton>
-                                </CCol>
-                    
-                            </CRow>
-                        </CForm>
+        <CCardBody>
+            {/* Formulario de agregar stock */}
+            <CForm onSubmit={handleSubmit}>
+            <CRow className="g-3">
+                <CCol md={6}>
+                <CFormInput
+                    label="Nombre del producto"
+                    placeholder="Nombre"
+                    value={formData.productName}
+                    onChange={(e) => setFormData({...formData, productName: e.target.value})}
+                    required
+                />
+                </CCol>
 
-                    <div className="mt-5">
-                        <CTable striped hover responsive>
-                            <CTableHead>
-                                <CTableRow>
-                                    <CTableHeaderCell> ID </CTableHeaderCell>
-                                    <CTableHeaderCell> NAME </CTableHeaderCell>
-                                    <CTableHeaderCell> CATEGORY </CTableHeaderCell>
-                                    <CTableHeaderCell> TYPE </CTableHeaderCell>
-                                    <CTableHeaderCell> DURATION </CTableHeaderCell>
-                                    <CTableHeaderCell> PRICE </CTableHeaderCell>
-                                </CTableRow>
-                            </CTableHead>
+                <CCol md={3}>
+                <CFormInput
+                    label="Cantidad"
+                    placeholder="Cantidad"
+                    type="number"
+                    min="1"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                    required
+                />
+                </CCol>
 
-                            <CTableBody>
+                <CCol md={3}>
+                <CFormInput
+                    type="date"
+                    label="Fecha de ingreso"
+                    value={formData.date}
+                    onChange={(e) => setFormData({...formData, date: e.target.value})}
+                    required
+                />
+                </CCol>
 
-                                    <CTableRow>
-                                        <CTableDataCell>1</CTableDataCell>
-                                        <CTableDataCell> Gold Facial</CTableDataCell>
-                                        <CTableDataCell>Facial</CTableDataCell>
-                                        <CTableDataCell>Premium</CTableDataCell>
-                                        <CTableDataCell>01:00:00</CTableDataCell>
-                                        <CTableDataCell>{formatCurrency(10)}</CTableDataCell>
-                                    </CTableRow>
+                <CCol md={12} className="text-end">
+                <CButton type="submit" color="primary">Agregar al Stock</CButton>
+                </CCol>
+            </CRow>
+            </CForm>
 
-                                    <CTableRow>
-                                        <CTableDataCell>2</CTableDataCell>
-                                        <CTableDataCell> Basic hydration</CTableDataCell>
-                                        <CTableDataCell>Hair</CTableDataCell>
-                                        <CTableDataCell>Basic</CTableDataCell>
-                                        <CTableDataCell>00:30:00</CTableDataCell>
-                                        <CTableDataCell>{formatCurrency(15)}</CTableDataCell>
-                                    </CTableRow>
+            {/* Filtros */}
+            <div className="mt-5">
+            <CRow className="mb-3 g-3">
+                <CCol md={6}>
+                <CInputGroup>
+                    <CFormInput
+                    placeholder="Buscar por nombre de producto..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </CInputGroup>
+                </CCol>
+                
+                <CCol md={3}>
+                <CFormInput
+                    type="date"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                    placeholder="Filtrar por fecha"
+                />
+                </CCol>
 
-                                    <CTableRow>
-                                        <CTableDataCell>3</CTableDataCell>
-                                        <CTableDataCell> Hair dye</CTableDataCell>
-                                        <CTableDataCell>Hair</CTableDataCell>
-                                        <CTableDataCell>Medium</CTableDataCell>
-                                        <CTableDataCell>01:00:00</CTableDataCell>
-                                        <CTableDataCell>{formatCurrency(80)}</CTableDataCell>
-                                    </CTableRow>
+                <CCol md={3} className="text-end">
+                <CButton 
+                    color="secondary" 
+                    onClick={() => {
+                    setSearchTerm('');
+                    setFilterDate('');
+                    }}
+                >
+                    Limpiar filtros
+                </CButton>
+                </CCol>
+            </CRow>
 
-                                    <CTableRow>
-                                        <CTableDataCell>4</CTableDataCell>
-                                        <CTableDataCell> semi-permanent polish</CTableDataCell>
-                                        <CTableDataCell>Nails</CTableDataCell>
-                                        <CTableDataCell>Basis</CTableDataCell>
-                                        <CTableDataCell>00:45:00</CTableDataCell>
-                                        <CTableDataCell>{formatCurrency(5)}</CTableDataCell>
-                                    </CTableRow>
+            {/* Tabla */}
+            <CTable striped hover responsive>
+                <CTableHead>
+                <CTableRow>
+                    <CTableHeaderCell>PRODUCTO</CTableHeaderCell>
+                    <CTableHeaderCell>CANTIDAD</CTableHeaderCell>
+                    <CTableHeaderCell>FECHA INGRESO</CTableHeaderCell>
+                    <CTableHeaderCell>ACCIONES</CTableHeaderCell>
+                </CTableRow>
+                </CTableHead>
 
-                            </CTableBody>
-                        </CTable>
-                    </div>
-                </CCardBody>
-            </CCard>
-        </>
+                <CTableBody>
+                {filteredStock.map(item => (
+                    <CTableRow key={item.id}>
+                    <CTableDataCell>{item.name}</CTableDataCell>
+                    <CTableDataCell>{item.amount}</CTableDataCell>
+                    <CTableDataCell>{item.date}</CTableDataCell>
+                    <CTableDataCell>
+                        <CButton color="warning" size="sm" className="me-2" onClick={() => handleEdit(item)}>
+                            Modificar
+                        </CButton>
+                        <CButton color="danger" size="sm" onClick={() => handleDelete(item.id)}>
+                            Eliminar
+                        </CButton>
+                    </CTableDataCell>
+                    </CTableRow>
+                ))}
+                </CTableBody>
 
+            </CTable>
+            </div>
+        
+        <CModal visible={visibleModal} onClose={() => setVisibleModal(false)}>
+          <CModalHeader>
+            <CModalTitle>Modificar Producto</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+            <CForm onSubmit={handleUpdate}>
+              <CFormInput
+                label="Nombre del producto"
+                value={editingItem?.name || ''}
+                onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Cantidad"
+                type="number"
+                value={editingItem?.amount || ''}
+                onChange={(e) => setEditingItem({ ...editingItem, amount: parseInt(e.target.value) || 0 })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                type="date"
+                label="Fecha de ingreso"
+                value={editingItem?.date || ''}
+                onChange={(e) => setEditingItem({ ...editingItem, date: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <div className="text-end">
+                <CButton color="secondary" className="me-2" onClick={() => setVisibleModal(false)}>
+                  Cancelar
+                </CButton>
+                <CButton color="primary" type="submit">
+                  Guardar Cambios
+                </CButton>
+              </div>
+            </CForm>
+          </CModalBody>
+        </CModal>
+        </CCardBody>
+        
+        </CCard>
     );
-}
+    };
 
-export default Services;
+export default Stock;

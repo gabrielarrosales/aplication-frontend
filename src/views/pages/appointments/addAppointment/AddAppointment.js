@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import {
 CCard,
 CCardBody,
@@ -15,7 +15,12 @@ CTableRow,
 CTableHeaderCell,
 CTableBody,
 CTableDataCell,
-CInputGroup
+CInputGroup,
+
+CModal,
+CModalHeader,
+CModalTitle,
+CModalBody
 } from '@coreui/react';
 
 
@@ -35,38 +40,92 @@ const [appointments, setAppointments] = useState([]); //originalmente sin nada d
 const [searchTerm, setSearchTerm] = useState('');
 const [filterStatus, setFilterStatus] = useState('all');
 const [filterDate, setFilterDate] = useState(''); 
+const [editingAppointment, setEditingAppointment] = useState(null);
+const [visibleModal, setVisibleModal] = useState(false);
 //[lo que guardo, funcion que va a actualizar el valor]= valor inicial
 
-const sampleData = [
-    { id: 1, client: 'Juan Pérez', service: 'Corte', date: '2024-05-20', time: '10:00', status: 'pending' },
-    { id: 2, client: 'María García', service: 'Color', date: '2024-05-21', time: '14:30', status: 'completed' }
-];
+    useEffect(() => {
+        fetch('http://localhost:5000/appointments')
+        .then((response) => response.json())
+        .then((data) => setAppointments(data))
+        .catch((error) => console.error('Error al cargar las citas:', error));
+    }, []);
 
-// para el envio del formulario
-const handleSubmit = (e) => {
-    
-    e.preventDefault();
+    // para el envio del formulario
+    const handleSubmit = (e) => {
+        e.preventDefault();
 
-    //para crear nueva cita
-    const newAppointment = {
-    id: appointments.length + 1,
-    ...formData //copia todos los datos del formulario
+        const newAppointment = {
+        clientName: formData.clientName,
+        service: formData.service,
+        date: formData.date,
+        time: formData.time,
+        status: formData.status,
+        };
+
+        fetch('http://localhost:5000/appointments', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newAppointment),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            setAppointments([...appointments, data]);
+            setFormData({ clientName: '', service: '', date: '', time: '', status: 'pending' });
+        })
+        .catch((error) => console.error('Error al agregar la cita:', error));
     };
 
-    //actualiza el listado de las citas
-    setAppointments([...appointments, newAppointment]); //aqui toma las citas existentes ...apointments y le agrega la nueva
-    setFormData({ clientName: '', service: '', date: '', time: '', status: 'pending' });//reinicio
-};
+    const handleDelete = (id) => {
+        if (window.confirm('¿Estás seguro de eliminar esta cita?')) {
+        fetch(`http://localhost:5000/appointments/${id}`, {
+            method: 'DELETE',
+        })
+            .then(() => {
+            setAppointments(appointments.filter((appointment) => appointment.id !== id));
+            })
+            .catch((error) => console.error('Error al eliminar la cita:', error));
+        }
+    };
 
-// Filtrar citas 
-const filteredAppointments = sampleData.filter(appointment => {
-    const matchesSearch = appointment.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+
+const filteredAppointments = appointments.filter(appointment => {
+    const matchesSearch = appointment.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         appointment.service.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || appointment.status === filterStatus;
     const matchesDate = !filterDate || appointment.date === filterDate;
     
     return matchesSearch && matchesStatus && matchesDate;
 });
+
+
+
+
+const handleEdit = (appointment) => {
+    setEditingAppointment(appointment);
+    setVisibleModal(true);
+};
+
+const handleUpdate = (e) => {
+    e.preventDefault();
+
+    fetch(`http://localhost:5000/appointments/${editingAppointment.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editingAppointment),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            setAppointments(appointments.map((app) => (app.id === data.id ? data : app)));
+            setVisibleModal(false); 
+            setEditingAppointment(null); 
+        })
+        .catch((error) => console.error('Error al actualizar la cita:', error));
+};
 
 return (
     <CCard className="mb-4">
@@ -193,7 +252,7 @@ return (
             <CTableBody>
                 {filteredAppointments.map(appointment => (
                     <CTableRow key={appointment.id}>
-                        <CTableDataCell>{appointment.client}</CTableDataCell>
+                        <CTableDataCell>{appointment.clientName}</CTableDataCell>
                         <CTableDataCell>{appointment.service}</CTableDataCell>
                         <CTableDataCell>{appointment.date}</CTableDataCell>
                         <CTableDataCell>{appointment.time}</CTableDataCell>
@@ -202,14 +261,81 @@ return (
                                 {appointment.status}
                             </span>
                         </CTableDataCell>
+
                         <CTableDataCell>
-                            <CButton color="danger" size="sm">Delete</CButton>
+                            <CButton color="danger" size="sm" onClick={() => handleDelete(appointment.id)} className="me-2">
+                                Eliminar
+                            </CButton>
+                            <CButton color="warning" size="sm" onClick={() => handleEdit(appointment)}>
+                                Modificar
+                            </CButton>
                         </CTableDataCell>
+
+
                     </CTableRow>
                 ))}
             </CTableBody>
         </CTable>
         </div>
+        
+        <CModal visible={visibleModal} onClose={() => setVisibleModal(false)}>
+            <CModalHeader>
+                <CModalTitle>Editar Cita</CModalTitle>
+            </CModalHeader>
+            <CModalBody>
+                <CForm onSubmit={handleUpdate}>
+                    <CFormInput
+                        label="Cliente"
+                        value={editingAppointment?.clientName || ''}
+                        onChange={(e) => setEditingAppointment({ ...editingAppointment, clientName: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <CFormInput
+                        label="Servicio"
+                        value={editingAppointment?.service || ''}
+                        onChange={(e) => setEditingAppointment({ ...editingAppointment, service: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <CFormInput
+                        type="date"
+                        label="Fecha"
+                        value={editingAppointment?.date || ''}
+                        onChange={(e) => setEditingAppointment({ ...editingAppointment, date: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <CFormInput
+                        type="time"
+                        label="Hora"
+                        value={editingAppointment?.time || ''}
+                        onChange={(e) => setEditingAppointment({ ...editingAppointment, time: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <CFormSelect
+                        label="Estado"
+                        value={editingAppointment?.status || ''}
+                        onChange={(e) => setEditingAppointment({ ...editingAppointment, status: e.target.value })}
+                        className="mb-3"
+                        required
+                    >
+                        <option value="pending">Pendiente</option>
+                        <option value="completed">Completada</option>
+                    </CFormSelect>
+                    <div className="text-end">
+                        <CButton color="secondary" className="me-2" onClick={() => setVisibleModal(false)}>
+                            Cancelar
+                        </CButton>
+                        <CButton color="primary" type="submit">
+                            Guardar Cambios
+                        </CButton>
+                    </div>
+                </CForm>
+            </CModalBody>
+        </CModal>
+        
         </CCardBody>
     </CCard>
 );

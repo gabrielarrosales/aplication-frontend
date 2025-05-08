@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 CCard,
-CardBody,
+CCardBody,
 CCardHeader,
 CTable,
 CTableHead,
@@ -16,104 +16,135 @@ CRow,
 CCol,
 CForm,
 CInputGroup,
-CBadge
+CBadge,
+CModal,
+CModalHeader,
+CModalTitle,
+CModalBody
 } from '@coreui/react';
 
 const Users = () => {
 
+const [users, setUsers] = useState([]);
+const [searchTerm, setSearchTerm] = useState('');
 const [formData, setFormData] = useState({
     ClientUserName: '',
     ClientFirstName: '',
     ClientLastName: '',
     ClientEmail: '',
-    Roll: '',
+    Role: '',
     ClienteDateRegister: '',
+    ClientAddress: '',
+    ClientPhone: '',
 });
 
-const [users, setUsers] = useState([
-    { 
-        username: 'juanperez', 
-        firstName: 'Juan', 
-        lastName: 'Pérez', 
-        email: 'juan@gmail.com', 
-        phone: '04121234567', 
-        address: 'Av. Principal, Caracas', 
-        role: 'cliente', 
-        registrationDate: '20-05-2024'
-    },
-    { 
-        username: 'mariagarcia', 
-        firstName: 'María', 
-        lastName: 'García', 
-        email: 'maria@gmail.com', 
-        phone: '04243334455', 
-        address: 'Calle Bolívar, Valencia', 
-        role: 'empleado', 
-        registrationDate: '15-04-2024'
-    },
-    { 
-        username: 'anaperez', 
-        firstName: 'Ana', 
-        lastName: 'Perez',
-        email: 'ana@gmail.com', 
-        phone: '04127787813', 
-        address: 'Av. Libertador', 
-        role: 'empleado',
-        registrationDate: '25-01-2025'
-    }
-]);
+useEffect(() => {
+    fetch('http://localhost:5000/users')
+        .then((response) => response.json())
+        .then((data) => {
+        setUsers(data);
+        })
+        .catch((error) => {
+        console.error('Error al cargar los usuarios:', error);
+        });
+    }, []);
 
-
-const [searchTerm, setSearchTerm] = useState('');
 const [filterRole, setFilterRole] = useState('all');
 const [filterDate, setFilterDate] = useState('');
 
-
 const filteredUsers = users.filter(user => {
+    const searchText = searchTerm.toLowerCase();
     const matchesSearch = 
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase());
+        user.username.toLowerCase().includes(searchText) ||
+        user.firstName.toLowerCase().includes(searchText) ||
+        user.lastName.toLowerCase().includes(searchText) ||
+        user.email.toLowerCase().includes(searchText);
     
     const matchesRole = filterRole === 'all' || user.role === filterRole;
-    const matchesDate = !filterDate || user.registrationDate === filterDate;
+    const matchesDate = !filterDate || user.ClienteDateRegister === filterDate;
     
     return matchesSearch && matchesRole && matchesDate;
 });
 
-
 const handleSubmit = (e) => {
     e.preventDefault();
     const newUser = {
-        id: users.length + 1,
         username: formData.ClientUserName,
         firstName: formData.ClientFirstName,
         lastName: formData.ClientLastName,
         email: formData.ClientEmail,
         phone: formData.ClientPhone,
         address: formData.ClientAddress,
-        role: formData.Roll,
+        role: formData.Role,
         registrationDate: formData.ClienteDateRegister
     };
-    setUsers([...users, newUser]);
-    setFormData({
-        ClientUserName: '',
-        ClientFirstName: '',
-        ClientLastName: '',
-        ClientEmail: '',
-        Roll: '',
-        ClienteDateRegister: ''
-    });
+
+    fetch('http://localhost:5000/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUser),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setUsers([...users, data]);
+          setFormData({
+            ClientUserName: '',
+            ClientFirstName: '',
+            ClientLastName: '',
+            ClientEmail: '',
+            Role: '',
+            ClienteDateRegister: '',
+          });
+        })
+        .catch((error) => {
+          console.error('Error al agregar el usuario:', error);
+        });
+    };
+
+
+    const handleDelete = (id) => {
+        console.log(`Intentando eliminar el usuario con ID: ${id}`);
+        if (window.confirm('¿Estás seguro de eliminar este usuario?')) {
+            fetch(`http://localhost:5000/users/${id}`, {
+                method: 'DELETE',
+            })
+                .then(() => {
+                    // Filtra los usuarios eliminando el que tiene el ID especificado
+                    setUsers(users.filter((user) => user.id !== id));
+                })
+                .catch((error) => {
+                    console.error('Error al eliminar el usuario:', error);
+                });
+        }
+    };
+
+const [editingUser, setEditingUser] = useState(null);
+const [visibleModal, setVisibleModal] = useState(false);
+const handleEdit = (user) => {
+    setEditingUser(user);
+    setVisibleModal(true);
 };
 
+const handleUpdate = (e) => {
+    e.preventDefault();
 
-const handleDelete = (id) => {
-    if (window.confirm('¿Estás seguro de eliminar este usuario?')) {
-    setUsers(users.filter(user => user.id !== id));
-    }
+    fetch(`http://localhost:5000/users/${editingUser.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editingUser),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            setUsers(users.map((user) => (user.id === data.id ? data : user)));
+            setVisibleModal(false);
+            setEditingUser(null);
+        })
+        .catch((error) => console.error('Error al actualizar el usuario:', error));
 };
-
 return (
     <CCard className="mb-4">
         <CCardHeader>
@@ -187,8 +218,8 @@ return (
                 <CCol md={6}>
                 <CFormSelect
                     label="Role"
-                    value={formData.Roll}
-                    onChange={(e) => setFormData({...formData, Roll: e.target.value})}
+                    value={formData.Role}
+                    onChange={(e) => setFormData({...formData, Role: e.target.value})}
                     required
                 >
                     <option value="">Select a role</option>
@@ -292,10 +323,14 @@ return (
                         {user.role}
                         </CBadge>
                     </CTableDataCell>
-                    <CTableDataCell>{user.registrationDate}</CTableDataCell>
+                    <CTableDataCell>{user.ClienteDateRegister}</CTableDataCell>
+
                     <CTableDataCell>
-                        <CButton color="danger" size="sm" onClick={() => handleDelete(user.id)}>
-                        Eliminar
+                        <CButton color="danger" size="sm" className="me-2" onClick={() => handleDelete(user.id)} >
+                            Eliminar
+                        </CButton>
+                        <CButton color="warning" size="sm" className="me-2" onClick={() => handleEdit(user)}>
+                            Modificar
                         </CButton>
                     </CTableDataCell>
                     </CTableRow>
@@ -303,8 +338,87 @@ return (
                 </CTableBody>
             </CTable>
             </div>
+
+            <CModal visible={visibleModal} onClose={() => setVisibleModal(false)}>
+    <CModalHeader>
+        <CModalTitle>Editar Usuario</CModalTitle>
+    </CModalHeader>
+    <CModalBody>
+        <CForm onSubmit={handleUpdate}>
+            <CFormInput
+                label="Username"
+                value={editingUser?.username || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
+                className="mb-3"
+                required
+            />
+            <CFormInput
+                label="First Name"
+                value={editingUser?.firstName || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, firstName: e.target.value })}
+                className="mb-3"
+                required
+            />
+            <CFormInput
+                label="Last Name"
+                value={editingUser?.lastName || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, lastName: e.target.value })}
+                className="mb-3"
+                required
+            />
+            <CFormInput
+                label="Email"
+                value={editingUser?.email || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                className="mb-3"
+                required
+            />
+            <CFormInput
+                label="Phone"
+                value={editingUser?.phone || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
+                className="mb-3"
+                required
+            />
+            <CFormInput
+                label="Address"
+                value={editingUser?.address || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, address: e.target.value })}
+                className="mb-3"
+                required
+            />
+            <CFormSelect
+                label="Role"
+                value={editingUser?.role || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+                className="mb-3"
+                required
+            >
+                <option value="administrador">Administrador</option>
+                <option value="cliente">Cliente</option>
+                <option value="empleado">Empleado</option>
+            </CFormSelect>
+            <CFormInput
+                type="date"
+                label="Registration Date"
+                value={editingUser?.ClienteDateRegister || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, ClienteDateRegister: e.target.value })}
+                className="mb-3"
+                required
+            />
+            <div className="text-end">
+                <CButton color="secondary" className="me-2" onClick={() => setVisibleModal(false)}>
+                    Cancelar
+                </CButton>
+                <CButton color="primary" type="submit">
+                    Guardar Cambios
+                </CButton>
+            </div>
+        </CForm>
+    </CModalBody>
+</CModal>
         </CCardBody>
-        </CCard>
+    </CCard>
     );
     };
 
