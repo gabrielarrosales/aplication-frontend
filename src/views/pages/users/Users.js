@@ -323,8 +323,7 @@ return (
                         {user.role}
                         </CBadge>
                     </CTableDataCell>
-                    <CTableDataCell>{user.ClienteDateRegister}</CTableDataCell>
-
+                    <CTableDataCell>{user.registrationDate}</CTableDataCell>
                     <CTableDataCell>
                         <CButton color="danger" size="sm" className="me-2" onClick={() => handleDelete(user.id)} >
                             Eliminar
@@ -340,83 +339,83 @@ return (
             </div>
 
             <CModal visible={visibleModal} onClose={() => setVisibleModal(false)}>
-    <CModalHeader>
-        <CModalTitle>Editar Usuario</CModalTitle>
-    </CModalHeader>
-    <CModalBody>
-        <CForm onSubmit={handleUpdate}>
-            <CFormInput
-                label="Username"
-                value={editingUser?.username || ''}
-                onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
-                className="mb-3"
-                required
-            />
-            <CFormInput
-                label="First Name"
-                value={editingUser?.firstName || ''}
-                onChange={(e) => setEditingUser({ ...editingUser, firstName: e.target.value })}
-                className="mb-3"
-                required
-            />
-            <CFormInput
-                label="Last Name"
-                value={editingUser?.lastName || ''}
-                onChange={(e) => setEditingUser({ ...editingUser, lastName: e.target.value })}
-                className="mb-3"
-                required
-            />
-            <CFormInput
-                label="Email"
-                value={editingUser?.email || ''}
-                onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                className="mb-3"
-                required
-            />
-            <CFormInput
-                label="Phone"
-                value={editingUser?.phone || ''}
-                onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
-                className="mb-3"
-                required
-            />
-            <CFormInput
-                label="Address"
-                value={editingUser?.address || ''}
-                onChange={(e) => setEditingUser({ ...editingUser, address: e.target.value })}
-                className="mb-3"
-                required
-            />
-            <CFormSelect
-                label="Role"
-                value={editingUser?.role || ''}
-                onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                className="mb-3"
-                required
-            >
-                <option value="administrador">Administrador</option>
-                <option value="cliente">Cliente</option>
-                <option value="empleado">Empleado</option>
-            </CFormSelect>
-            <CFormInput
-                type="date"
-                label="Registration Date"
-                value={editingUser?.ClienteDateRegister || ''}
-                onChange={(e) => setEditingUser({ ...editingUser, ClienteDateRegister: e.target.value })}
-                className="mb-3"
-                required
-            />
-            <div className="text-end">
-                <CButton color="secondary" className="me-2" onClick={() => setVisibleModal(false)}>
-                    Cancelar
-                </CButton>
-                <CButton color="primary" type="submit">
-                    Guardar Cambios
-                </CButton>
-            </div>
-        </CForm>
-    </CModalBody>
-</CModal>
+            <CModalHeader>
+                <CModalTitle>Editar Usuario</CModalTitle>
+            </CModalHeader>
+            <CModalBody>
+                <CForm onSubmit={handleUpdate}>
+                    <CFormInput
+                        label="Username"
+                        value={editingUser?.username || ''}
+                        onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <CFormInput
+                        label="First Name"
+                        value={editingUser?.firstName || ''}
+                        onChange={(e) => setEditingUser({ ...editingUser, firstName: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <CFormInput
+                        label="Last Name"
+                        value={editingUser?.lastName || ''}
+                        onChange={(e) => setEditingUser({ ...editingUser, lastName: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <CFormInput
+                        label="Email"
+                        value={editingUser?.email || ''}
+                        onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <CFormInput
+                        label="Phone"
+                        value={editingUser?.phone || ''}
+                        onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <CFormInput
+                        label="Address"
+                        value={editingUser?.address || ''}
+                        onChange={(e) => setEditingUser({ ...editingUser, address: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <CFormSelect
+                        label="Role"
+                        value={editingUser?.role || ''}
+                        onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+                        className="mb-3"
+                        required
+                    >
+                        <option value="administrador">Administrador</option>
+                        <option value="cliente">Cliente</option>
+                        <option value="empleado">Empleado</option>
+                    </CFormSelect>
+                    <CFormInput
+                        type="date"
+                        label="Registration Date"
+                        value={editingUser?.ClienteDateRegister || ''}
+                        onChange={(e) => setEditingUser({ ...editingUser, ClienteDateRegister: e.target.value })}
+                        className="mb-3"
+                        required
+                    />
+                    <div className="text-end">
+                        <CButton color="secondary" className="me-2" onClick={() => setVisibleModal(false)}>
+                            Cancelar
+                        </CButton>
+                        <CButton color="primary" type="submit">
+                            Guardar Cambios
+                        </CButton>
+                    </div>
+                </CForm>
+            </CModalBody>
+        </CModal>
         </CCardBody>
     </CCard>
     );

@@ -61,11 +61,11 @@ const _nav = [
         name: 'Add Appointment',
         to: '/appointments/add',
       },
-      {
-        component: CNavItem,
-        name: 'Calendar',
-        to: '/appointments/calendar',
-      }
+      //{
+        //component: CNavItem,
+        //name: 'Calendar',
+        //to: '/appointments/calendar',
+      //}
     ]
   }
 
