@@ -39,7 +39,7 @@ const Services = () => {
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterType, setFilterType] = useState('all');
 
-  // Cargar servicios desde json-server
+  // desde json-server
   useEffect(() => {
     fetch('http://localhost:5000/services')
       .then((response) => response.json())

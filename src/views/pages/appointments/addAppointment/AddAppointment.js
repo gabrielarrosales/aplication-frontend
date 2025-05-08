@@ -26,7 +26,6 @@ CModalBody
 
 const AddAppointment = () => {
 
-//estos son los estados iniciales para el formulario
 const [formData, setFormData] = useState({
     clientName: '',
     service: '',

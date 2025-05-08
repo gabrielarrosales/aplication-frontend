@@ -104,6 +104,14 @@
       "date": "2025-05-09",
       "time": "15:30",
       "status": "pending"
+    },
+    {
+      "id": "d1bd",
+      "clientName": "gabriela rosales",
+      "service": "Corte",
+      "date": "2025-05-08",
+      "time": "15:00",
+      "status": "completed"
     }
   ],
   "services": [
