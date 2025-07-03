@@ -20,9 +20,10 @@ import {
   CModalTitle,
   CModalFooter,
 } from '@coreui/react';
+import { BASE_URL } from '../../../config'; // Asegúrate de que la ruta sea correcta
 
 const Services = () => {
-  // Estado para el formulario
+  const [services, setServices] = useState([]);
   const [formData, setFormData] = useState({
     servicename: '',
     idcategory: '',
@@ -30,9 +31,6 @@ const Services = () => {
     duration: '',
     price: '',
   });
-
-  // Estado para los servicios y filtros
-  const [services, setServices] = useState([]);
   const [filters, setFilters] = useState({
     servicename: '',
     idcategory: '',
@@ -40,23 +38,18 @@ const Services = () => {
     price: '',
   });
   const [showAddForm, setShowAddForm] = useState(false);
-
-  // Modales de confirmación
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-
-  // Modal para editar servicio
   const [editingService, setEditingService] = useState(null);
   const [visibleModal, setVisibleModal] = useState(false);
 
-  // Token JWT si lo usas
   const token = localStorage.getItem('token');
 
   // Cargar servicios desde el backend real
   useEffect(() => {
-    fetch('http://localhost:3001/services', {
+    fetch(`${BASE_URL}/services`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -70,21 +63,6 @@ const Services = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (formData.servicename.length < 3) {
-      alert('El nombre del servicio debe tener al menos 3 caracteres');
-      return;
-    }
-    if (!formData.idcategory || isNaN(Number(formData.idcategory)) || Number(formData.idcategory) <= 0) {
-      alert('La categoría debe ser un número positivo');
-      return;
-    }
-    // Validar formato HH:mm:ss
-    const durationRegex = /^([0-1]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
-    if (!durationRegex.test(formData.duration)) {
-      alert('Formato de duración inválido. Usa HH:mm:ss (ej: 00:30:00)');
-      return;
-    }
-
     const newService = {
       servicename: formData.servicename,
       idcategory: Number(formData.idcategory),
@@ -93,7 +71,7 @@ const Services = () => {
       price: Number(formData.price),
     };
 
-    fetch('http://localhost:3001/services', {
+    fetch(`${BASE_URL}/services`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -129,7 +107,7 @@ const Services = () => {
   };
 
   const confirmDelete = () => {
-    fetch(`http://localhost:3001/services/${serviceToDelete.idservice}`, {
+    fetch(`${BASE_URL}/services/${serviceToDelete.idservice}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -153,7 +131,7 @@ const Services = () => {
   const handleUpdate = (e) => {
     e.preventDefault();
 
-    fetch(`http://localhost:3001/services/${editingService.idservice}`, {
+    fetch(`${BASE_URL}/services/${editingService.idservice}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -181,21 +159,13 @@ const Services = () => {
       .catch((error) => alert(error.message));
   };
 
-  // Filtros avanzados
-  const filteredServices = Array.isArray(services)
-    ? services.filter((service) => {
-        const name = service?.servicename?.toLowerCase() || '';
-        const idcategory = String(service?.idcategory || '');
-        const idtype = String(service?.idtype || '');
-        const price = String(service?.price || '');
-        return (
-          name.includes(filters.servicename.toLowerCase()) &&
-          idcategory.includes(filters.idcategory) &&
-          idtype.includes(filters.idtype) &&
-          price.includes(filters.price)
-        );
-      })
-    : [];
+  // Filtro avanzado
+  const filteredServices = services.filter((service) =>
+    service.servicename?.toLowerCase().includes(filters.servicename.toLowerCase()) &&
+    (filters.idcategory === '' || String(service.idcategory).includes(filters.idcategory)) &&
+    (filters.idtype === '' || String(service.idtype).includes(filters.idtype)) &&
+    (filters.price === '' || String(service.price).includes(filters.price))
+  );
 
   // Estilo moderno y elegante
   return (

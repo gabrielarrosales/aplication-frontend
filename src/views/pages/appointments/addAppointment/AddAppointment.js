@@ -4,8 +4,9 @@ import {
 } from '@coreui/react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { BASE_URL } from '../../../../config'// Importa la variable global
 
-const API_URL = 'http://localhost:3001/reservations'
+const API_URL = `${BASE_URL}/reservations`
 
 const HOURS = [
   '09:00', '10:00', '11:00', '12:00', '13:00',
@@ -26,9 +27,9 @@ export default function ReservationsTable() {
 
   useEffect(() => {
     fetchData(API_URL, setReservations)
-    fetchData('http://localhost:3001/users', setUsers)
-    fetchData('http://localhost:3001/services', setServices)
-    fetchData('http://localhost:3001/employees', setEmployees)
+    fetchData(`${BASE_URL}/users`, setUsers)
+    fetchData(`${BASE_URL}/services`, setServices)
+    fetchData(`${BASE_URL}/employees`, setEmployees)
     // eslint-disable-next-line
   }, [token])
 

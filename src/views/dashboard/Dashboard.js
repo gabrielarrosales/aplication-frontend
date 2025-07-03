@@ -5,6 +5,7 @@ import {
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilUser, cilPeople, cilList, cilCalendar } from '@coreui/icons';
+import { BASE_URL } from '../../config'; // Importa la variable global
 
 const Dashboard = () => {
   const [users, setUsers] = useState([]);
@@ -18,10 +19,10 @@ const Dashboard = () => {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch('http://localhost:3001/users', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-      fetch('http://localhost:3001/employees', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-      fetch('http://localhost:3001/services', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-      fetch('http://localhost:3001/reservations', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+      fetch(`${BASE_URL}/users`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+      fetch(`${BASE_URL}/employees`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+      fetch(`${BASE_URL}/services`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+      fetch(`${BASE_URL}/reservations`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
     ]).then(([usersData, employeesData, servicesData, reservationsData]) => {
       setUsers(Array.isArray(usersData) ? usersData : []);
       setEmployees(Array.isArray(employeesData) ? employeesData : []);
@@ -31,15 +32,15 @@ const Dashboard = () => {
     }).catch(() => setLoading(false));
   }, [token]);
 
-const formatDateYMD = (dateStr) => {
-  if (!dateStr) return '-';
-  const d = new Date(dateStr);
-  if (isNaN(d)) return '-';
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+  const formatDateYMD = (dateStr) => {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '-';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   // Resumen de reservas por estado
   const reservationStatus = reservations.reduce((acc, r) => {

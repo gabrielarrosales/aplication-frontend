@@ -4,6 +4,7 @@ import {
   CTableBody, CTableDataCell, CButton, CFormInput, CRow, CCol, CForm,
   CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter
 } from '@coreui/react';
+import { BASE_URL } from '../../../config'; // Importa la variable global
 
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
@@ -38,7 +39,7 @@ const Employees = () => {
       window.location.href = '/login';
       return;
     }
-    fetch('http://localhost:3001/employees', {
+    fetch(`${BASE_URL}/employees`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -92,7 +93,7 @@ const Employees = () => {
         return;
       }
     }
-    fetch('http://localhost:3001/employees', {
+    fetch(`${BASE_URL}/employees`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,7 +123,7 @@ const Employees = () => {
   };
 
   const confirmDelete = () => {
-    fetch(`http://localhost:3001/employees/${employeeToDelete.idemployee}`, {
+    fetch(`${BASE_URL}/employees/${employeeToDelete.idemployee}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -143,7 +144,7 @@ const Employees = () => {
 
   const handleUpdate = (e) => {
     e.preventDefault();
-    fetch(`http://localhost:3001/employees/${editingEmployee.idemployee}`, {
+    fetch(`${BASE_URL}/employees/${editingEmployee.idemployee}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

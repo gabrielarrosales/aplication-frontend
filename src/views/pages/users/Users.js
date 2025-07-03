@@ -4,6 +4,7 @@ import {
   CTableBody, CTableDataCell, CButton, CFormInput, CRow, CCol, CForm, CModal,
   CModalHeader, CModalTitle, CModalBody, CModalFooter, CFormSelect
 } from '@coreui/react';
+import { BASE_URL } from '../../../config'; // Asegúrate de que la ruta sea correcta
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -36,7 +37,7 @@ const Users = () => {
 
   // Cargar usuarios
   useEffect(() => {
-    fetch('http://localhost:3001/users', {
+    fetch(`${BASE_URL}/users`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -83,7 +84,7 @@ const Users = () => {
       }
     }
     const dataToSend = { ...formData, idroll: Number(formData.idroll) };
-    fetch('http://localhost:3001/users', {
+    fetch(`${BASE_URL}/users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -110,7 +111,7 @@ const Users = () => {
   };
 
   const confirmDelete = () => {
-    fetch(`http://localhost:3001/users/${deleteUser.iduser}`, {
+    fetch(`${BASE_URL}/users/${deleteUser.iduser}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -133,7 +134,7 @@ const Users = () => {
   // Actualizar usuario con modal de confirmación
   const handleUpdate = (e) => {
     e.preventDefault();
-    fetch(`http://localhost:3001/users/${editingUser.iduser}`, {
+    fetch(`${BASE_URL}/users/${editingUser.iduser}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

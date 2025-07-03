@@ -15,6 +15,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
+import { BASE_URL } from '../../../config' // Importa la variable global
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -22,26 +23,26 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  try {
-    const res = await fetch('http://localhost:3001/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await res.json();
-    console.log('Respuesta backend:', data); // <-- Agrega esto
-    if (res.ok && data.token) {
-      localStorage.setItem('token', data.token);
-      navigate('/');
-    } else {
-      alert(data.mensaje || 'Credenciales incorrectas');
+    e.preventDefault();
+    try {
+      const res = await fetch(`${BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      console.log('Respuesta backend:', data);
+      if (res.ok && data.token) {
+        localStorage.setItem('token', data.token);
+        navigate('/');
+      } else {
+        alert(data.mensaje || JSON.stringify(data) || 'Credenciales incorrectas');
+      }
+    } catch (error) {
+      console.error('Error real:', error);
+      alert('Error al iniciar sesión');
     }
-  } catch (error) {
-    console.error('Error real:', error); // <-- Agrega esto
-    alert('Error al iniciar sesión');
-  }
-};
+  };
 
   return (
     <div className="min-vh-100 d-flex flex-row align-items-center" style={{ backgroundColor: '#FFF0F5', fontFamily: "'Arial', sans-serif" }}>
