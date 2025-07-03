@@ -1,423 +1,460 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-CCard,
-CCardBody,
-CTable,
-CTableHead,
-CTableRow,
-CTableHeaderCell,
-CTableBody,
-CTableDataCell,
-CButton,
-CFormSelect,
-CFormInput,
-CRow,
-CCol,
-CForm,
-CInputGroup,
-CBadge,
-CModal,
-CModalHeader,
-CModalTitle,
-CModalBody
+  CCard, CCardHeader, CCardBody, CTable, CTableHead, CTableRow, CTableHeaderCell,
+  CTableBody, CTableDataCell, CButton, CFormInput, CRow, CCol, CForm, CModal,
+  CModalHeader, CModalTitle, CModalBody, CModalFooter, CFormSelect
 } from '@coreui/react';
 
 const Users = () => {
+  const [users, setUsers] = useState([]);
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    firstname: '',
+    lastname: '',
+    email: '',
+    phonenumber: '',
+    address: '',
+    idroll: '',
+    fecha_ingresado: '',
+  });
+  const [search, setSearch] = useState({
+    username: '',
+    firstname: '',
+    lastname: '',
+    email: '',
+    fecha_ingresado: '',
+  });
+  const [visibleAddModal, setVisibleAddModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [visibleEditModal, setVisibleEditModal] = useState(false);
+  const [deleteUser, setDeleteUser] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
-const [users, setUsers] = useState([]);
-const [searchTerm, setSearchTerm] = useState('');
-const [formData, setFormData] = useState({
-    ClientUserName: '',
-    ClientFirstName: '',
-    ClientLastName: '',
-    ClientEmail: '',
-    Role: '',
-    ClienteDateRegister: '',
-    ClientAddress: '',
-    ClientPhone: '',
-});
+  const token = localStorage.getItem('token');
 
-useEffect(() => {
-    fetch('http://localhost:5000/uses')
-        .then((response) => response.json())
-        .then((data) => {
-        setUsers(data);
-        })
-        .catch((error) => {
-        console.error('Error al cargar los usuarios:', error);
-        });
-    }, []);
-
-const [filterRole, setFilterRole] = useState('all');
-const [filterDate, setFilterDate] = useState('');
-
-const filteredUsers = users.filter(user => {
-    const searchText = searchTerm.toLowerCase();
-    const matchesSearch = 
-        user.username.toLowerCase().includes(searchText) ||
-        user.firstName.toLowerCase().includes(searchText) ||
-        user.lastName.toLowerCase().includes(searchText) ||
-        user.email.toLowerCase().includes(searchText);
-    
-    const matchesRole = filterRole === 'all' || user.role === filterRole;
-    const matchesDate = !filterDate || user.ClienteDateRegister === filterDate;
-    
-    return matchesSearch && matchesRole && matchesDate;
-});
-
-const handleSbmit = (e) => {
-    e.preventDefault();
-    const newUser = {
-        username: formData.ClientUserName,
-        firstName: formData.ClientFirstName,
-        lastName: formData.ClientLastName,
-        email: formData.ClientEmail,
-        phone: formData.ClientPhone,
-        address: formData.ClientAddress,
-        role: formData.Role,
-        registrationDate: formData.ClienteDateRegister
-    };
-
-    fetch('http://localhost:5000/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newUser),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          setUsers([...users, data]);
-          setFormData({
-            ClientUserName: '',
-            ClientFirstName: '',
-            ClientLastName: '',
-            ClientEmail: '',
-            Role: '',
-            ClienteDateRegister: '',
-          });
-        })
-        .catch((error) => {
-          console.error('Error al agregar el usuario:', error);
-        });
-    };
-
-
-    const handleDelete = (id) => {
-        console.log(`Intentando eliminar el usuario con ID: ${id}`);
-        if (window.confirm('¿Estás seguro de eliminar este usuario?')) {
-            fetch(`http://localhost:5000/users/${id}`, {
-                method: 'DELETE',
-            })
-                .then(() => {
-                    // Filtra los usuarios eliminando el que tiene el ID especificado
-                    setUsers(users.filter((user) => user.id !== id));
-                })
-                .catch((error) => {
-                    console.error('Error al eliminar el usuario:', error);
-                });
-        }
-    };
-
-const [editingUser, setEditingUser] = useState(null);
-const [visibleModal, setVisibleModal] = useState(false);
-const handleEdit = (user) => {
-    setEditingUser(user);
-    setVisibleModal(true);
-};
-
-const handleUpdate = (e) => {
-    e.preventDefault();
-
-    fetch(`http://localhost:5000/users/${editingUser.id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editingUser),
+  // Cargar usuarios
+  useEffect(() => {
+    fetch('http://localhost:3001/users', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
     })
-        .then((response) => response.json())
-        .then((data) => {
-            setUsers(users.map((user) => (user.id === data.id ? data : user)));
-            setVisibleModal(false);
-            setEditingUser(null);
-        })
-        .catch((error) => console.error('Error al actualizar el usuario:', error));
-};
-return (
-    <CCard className="mb-4">
-        <CCardHeader>
-            <h5 className="mb-0">Users</h5>
-        </CCardHeader>
+      .then((res) => res.json())
+      .then((data) => setUsers(Array.isArray(data) ? data : []))
+      .catch((err) => console.error('Error al cargar los usuarios:', err));
+  }, [token]);
 
-        <CCardBody>
-        
+  // Filtro avanzado
+  const filteredUsers = users.filter(user =>
+    (user.username?.toLowerCase().includes(search.username.toLowerCase())) &&
+    (user.firstname?.toLowerCase().includes(search.firstname.toLowerCase())) &&
+    (user.lastname?.toLowerCase().includes(search.lastname.toLowerCase())) &&
+    (user.email?.toLowerCase().includes(search.email.toLowerCase())) &&
+    (user.fecha_ingresado?.slice(0, 10).includes(search.fecha_ingresado))
+  );
+
+  // Abrir modal para crear usuario
+  const handleAddModalOpen = () => {
+    setFormData({
+      username: '',
+      password: '',
+      firstname: '',
+      lastname: '',
+      email: '',
+      phonenumber: '',
+      address: '',
+      idroll: '',
+      fecha_ingresado: '',
+    });
+    setVisibleAddModal(true);
+  };
+
+  const handleAddModalClose = () => setVisibleAddModal(false);
+
+  // Crear usuario
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    for (const key in formData) {
+      if (!formData[key] && key !== 'fecha_ingresado') {
+        alert('Por favor, complete todos los campos obligatorios.');
+        return;
+      }
+    }
+    const dataToSend = { ...formData, idroll: Number(formData.idroll) };
+    fetch('http://localhost:3001/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(dataToSend),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.mensaje || 'Error al agregar usuario');
+        return data;
+      })
+      .then((data) => {
+        setUsers([...users, data]);
+        setVisibleAddModal(false);
+      })
+      .catch((err) => alert(err.message));
+  };
+
+  // Eliminar usuario con modal de confirmación
+  const handleDelete = (user) => {
+    setDeleteUser(user);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    fetch(`http://localhost:3001/users/${deleteUser.iduser}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then(() => {
+        setUsers(users.filter((user) => user.iduser !== deleteUser.iduser));
+        setShowDeleteModal(false);
+        setDeleteUser(null);
+      })
+      .catch((err) => alert('Error al eliminar usuario: ' + err));
+  };
+
+  // Editar usuario
+  const handleEdit = (user) => {
+    setEditingUser(user);
+    setVisibleEditModal(true);
+  };
+
+  // Actualizar usuario con modal de confirmación
+  const handleUpdate = (e) => {
+    e.preventDefault();
+    fetch(`http://localhost:3001/users/${editingUser.iduser}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(editingUser),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.mensaje || 'Error al actualizar usuario');
+        return data;
+      })
+      .then((data) => {
+        setUsers(users.map((user) => (user.iduser === data.iduser ? data : user)));
+        setVisibleEditModal(false);
+        setEditingUser(null);
+        setShowUpdateModal(true);
+        setTimeout(() => setShowUpdateModal(false), 1800);
+      })
+      .catch((err) => alert(err.message));
+  };
+
+  // Formato elegante para la tabla
+  return (
+    <CCard className="mb-4 shadow border-0" style={{ borderRadius: 18 }}>
+      <CCardHeader className="d-flex justify-content-between align-items-center bg-white" style={{ borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
+        <h5 className="mb-0 fw-bold" style={{ color: 'var(--cui-primary)' }}>Usuarios</h5>
+        <CButton color="primary" onClick={handleAddModalOpen}>
+          Crear nuevo usuario
+        </CButton>
+      </CCardHeader>
+      <CCardBody>
+        {/* Filtros avanzados */}
+        <CRow className="mb-4 g-3">
+          <CCol md={2}>
+            <CFormInput
+              label="Usuario"
+              placeholder="Buscar usuario"
+              value={search.username}
+              onChange={e => setSearch({ ...search, username: e.target.value })}
+              size="sm"
+            />
+          </CCol>
+          <CCol md={2}>
+            <CFormInput
+              label="Nombre"
+              placeholder="Buscar nombre"
+              value={search.firstname}
+              onChange={e => setSearch({ ...search, firstname: e.target.value })}
+              size="sm"
+            />
+          </CCol>
+          <CCol md={2}>
+            <CFormInput
+              label="Apellido"
+              placeholder="Buscar apellido"
+              value={search.lastname}
+              onChange={e => setSearch({ ...search, lastname: e.target.value })}
+              size="sm"
+            />
+          </CCol>
+          <CCol md={3}>
+            <CFormInput
+              label="Email"
+              placeholder="Buscar email"
+              value={search.email}
+              onChange={e => setSearch({ ...search, email: e.target.value })}
+              size="sm"
+            />
+          </CCol>
+          <CCol md={3}>
+            <CFormInput
+              label="Fecha de ingreso"
+              type="date"
+              value={search.fecha_ingresado}
+              onChange={e => setSearch({ ...search, fecha_ingresado: e.target.value })}
+              size="sm"
+            />
+          </CCol>
+        </CRow>
+
+        {/* Tabla elegante */}
+        <CTable hover responsive bordered align="middle" className="shadow-sm" style={{ borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+          <CTableHead color="light">
+            <CTableRow>
+              <CTableHeaderCell>Usuario</CTableHeaderCell>
+              <CTableHeaderCell>Nombre</CTableHeaderCell>
+              <CTableHeaderCell>Apellido</CTableHeaderCell>
+              <CTableHeaderCell>Email</CTableHeaderCell>
+              <CTableHeaderCell>Teléfono</CTableHeaderCell>
+              <CTableHeaderCell>Dirección</CTableHeaderCell>
+              <CTableHeaderCell>Rol</CTableHeaderCell>
+              <CTableHeaderCell>Fecha Ingreso</CTableHeaderCell>
+              <CTableHeaderCell>Acciones</CTableHeaderCell>
+            </CTableRow>
+          </CTableHead>
+          <CTableBody>
+            {filteredUsers.map((user) => (
+              <CTableRow key={user.iduser}>
+                <CTableDataCell>{user.username}</CTableDataCell>
+                <CTableDataCell>{user.firstname}</CTableDataCell>
+                <CTableDataCell>{user.lastname}</CTableDataCell>
+                <CTableDataCell>{user.email}</CTableDataCell>
+                <CTableDataCell>{user.phonenumber}</CTableDataCell>
+                <CTableDataCell>{user.address}</CTableDataCell>
+                <CTableDataCell>{user.idroll}</CTableDataCell>
+                <CTableDataCell>{user.fecha_ingresado?.slice(0, 10)}</CTableDataCell>
+                <CTableDataCell>
+                  <CButton color="danger" size="sm" className="me-2" variant="outline"
+                    onClick={() => handleDelete(user)}>
+                    Eliminar
+                  </CButton>
+                  <CButton color="warning" size="sm" variant="outline"
+                    onClick={() => handleEdit(user)}>
+                    Modificar
+                  </CButton>
+                </CTableDataCell>
+              </CTableRow>
+            ))}
+          </CTableBody>
+        </CTable>
+
+        {/* Modal para crear usuario */}
+        <CModal visible={visibleAddModal} onClose={handleAddModalClose}>
+          <CModalHeader>
+            <CModalTitle>Crear nuevo usuario</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
             <CForm onSubmit={handleSubmit}>
-                <CRow className="g-3">
-                    <CCol md={6}>
-                        <CFormInput
-                            label="Client username"
-                            placeholder="username"
-                            value={formData.ClientUserName}
-                            onChange={(e) => setFormData({...formData, ClientUserName: e.target.value})}
-                            required
-                        />
-                    </CCol>
-
-                <CCol md={6}>
-                    <CFormInput
-                        label="Client firstname"
-                        placeholder="firstname"
-                        value={formData.ClientFirstName}
-                        onChange={(e) => setFormData({...formData, ClientFirstName: e.target.value})}
-                        required
-                    />
-                </CCol>
-
-                <CCol md={6}>
-                    <CFormInput
-                        label="Client lastname"
-                        placeholder="lastname"
-                        value={formData.ClientLastName}
-                        onChange={(e) => setFormData({...formData, ClientLastName: e.target.value})}
-                        required
-                        />
-                </CCol>
-
-                <CCol md={6}>
-                    <CFormInput
-                        label="Client e-mail"
-                        placeholder="email"
-                        value={formData.ClientEmail}
-                        onChange={(e) => setFormData({...formData, ClientEmail: e.target.value})}
-                        required
-                    />
-                </CCol>
-
-                <CCol md={6}>
-                <CFormInput
-                    label="Client phone number"
-                    placeholder="phone number"
-                    value={formData.ClientPhone}
-                    onChange={(e) => setFormData({...formData, ClientPhone: e.target.value})}
-                    required
-                />
-                </CCol>
-
-                <CCol md={6}>
-                <CFormInput
-                    label="Client address"
-                    placeholder="address"
-                    value={formData.ClientAddress}
-                    onChange={(e) => setFormData({...formData, ClientAddress: e.target.value})}
-                    required
-                />
-                </CCol>
-
-                <CCol md={6}>
-                <CFormSelect
-                    label="Role"
-                    value={formData.Role}
-                    onChange={(e) => setFormData({...formData, Role: e.target.value})}
-                    required
-                >
-                    <option value="">Select a role</option>
-                    <option value="administrador">Administrador</option>
-                    <option value="cliente">Cliente</option>
-                    <option value="empleado">Empleado</option>
-                </CFormSelect>
-                </CCol>
-
-                <CCol md={3}>
-                <CFormInput
-                    type="date"
-                    label="Date register"
-                    value={formData.ClienteDateRegister}
-                    onChange={(e) => setFormData({...formData, ClienteDateRegister: e.target.value})}
-                    required
-                />
-                </CCol>
-
-                <CCol md={12} className="text-end">
-                <CButton type="submit" color="primary">Add User</CButton>
-                </CCol>
-            </CRow>
-            </CForm>
-
-            {/* Filtros */}
-            <div className="mt-5">
-            <CRow className="mb-3 g-3">
-                <CCol md={4}>
-                <CInputGroup>
-                    <CFormInput
-                    placeholder="Buscar por username, nombre o email..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </CInputGroup>
-                </CCol>
-                
-                <CCol md={2}>
-                <CFormSelect
-                    value={filterRole}
-                    onChange={(e) => setFilterRole(e.target.value)}
-                >
-                    <option value="all">Todos los roles</option>
-                    <option value="administrador">Administrador</option>
-                    <option value="cliente">Cliente</option>
-                    <option value="empleado">Empleado</option>
-                </CFormSelect>
-                </CCol>
-
-                <CCol md={3}>
-                <CFormInput
-                    type="date"
-                    value={filterDate}
-                    onChange={(e) => setFilterDate(e.target.value)}
-                    placeholder="Filtrar por fecha"
-                />
-                </CCol>
-
-                <CCol md={3} className="text-end">
-                <CButton 
-                    color="secondary" 
-                    onClick={() => {
-                    setSearchTerm('');
-                    setFilterRole('all');
-                    setFilterDate('');
-                    }}
-                >
-                    Limpiar
+              <CFormInput
+                label="Usuario"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Contraseña"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Nombre"
+                value={formData.firstname}
+                onChange={(e) => setFormData({ ...formData, firstname: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Apellido"
+                value={formData.lastname}
+                onChange={(e) => setFormData({ ...formData, lastname: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Teléfono"
+                value={formData.phonenumber}
+                onChange={(e) => setFormData({ ...formData, phonenumber: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Dirección"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Rol (idroll)"
+                type="number"
+                value={formData.idroll}
+                onChange={(e) => setFormData({ ...formData, idroll: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Fecha de ingreso"
+                type="date"
+                value={formData.fecha_ingresado}
+                onChange={(e) => setFormData({ ...formData, fecha_ingresado: e.target.value })}
+                className="mb-3"
+              />
+              <div className="text-end">
+                <CButton color="secondary" className="me-2" onClick={handleAddModalClose}>
+                  Cancelar
                 </CButton>
-                </CCol>
-            </CRow>
-
-            {/* Tabla */}
-            <CTable striped hover responsive>
-                <CTableHead>
-                <CTableRow>
-                    <CTableHeaderCell>Username</CTableHeaderCell>
-                    <CTableHeaderCell>FirstName</CTableHeaderCell>
-                    <CTableHeaderCell>LastName</CTableHeaderCell>
-                    <CTableHeaderCell>Email</CTableHeaderCell>
-                    <CTableHeaderCell>Phone</CTableHeaderCell>
-                    <CTableHeaderCell>Address</CTableHeaderCell>
-                    <CTableHeaderCell>Role</CTableHeaderCell>
-                    <CTableHeaderCell>DateRegister</CTableHeaderCell>
-                    <CTableHeaderCell>Acciones</CTableHeaderCell>
-                </CTableRow>
-                </CTableHead>
-
-                <CTableBody>
-                {filteredUsers.map((user) => (
-                    <CTableRow key={user.id}>
-                    <CTableDataCell>{user.username}</CTableDataCell>
-                    <CTableDataCell>{user.firstName}</CTableDataCell>
-                    <CTableDataCell>{user.lastName}</CTableDataCell>
-                    <CTableDataCell>{user.email}</CTableDataCell>
-                    <CTableDataCell>{user.phone}</CTableDataCell>
-                    <CTableDataCell>{user.address}</CTableDataCell>
-                    <CTableDataCell>
-                        <CBadge color={user.role === 'empleado' ? 'primary' : user.role === 'administrador' ? 'danger' : 'success'}>
-                        {user.role}
-                        </CBadge>
-                    </CTableDataCell>
-                    <CTableDataCell>{user.registrationDate}</CTableDataCell>
-                    <CTableDataCell>
-                        <CButton color="danger" size="sm" className="me-2" onClick={() => handleDelete(user.id)} >
-                            Eliminar
-                        </CButton>
-                        <CButton color="warning" size="sm" className="me-2" onClick={() => handleEdit(user)}>
-                            Modificar
-                        </CButton>
-                    </CTableDataCell>
-                    </CTableRow>
-                ))}
-                </CTableBody>
-            </CTable>
-            </div>
-
-            <CModal visible={visibleModal} onClose={() => setVisibleModal(false)}>
-            <CModalHeader>
-                <CModalTitle>Editar Usuario</CModalTitle>
-            </CModalHeader>
-            <CModalBody>
-                <CForm onSubmit={handleUpdate}>
-                    <CFormInput
-                        label="Username"
-                        value={editingUser?.username || ''}
-                        onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
-                        className="mb-3"
-                        required
-                    />
-                    <CFormInput
-                        label="First Name"
-                        value={editingUser?.firstName || ''}
-                        onChange={(e) => setEditingUser({ ...editingUser, firstName: e.target.value })}
-                        className="mb-3"
-                        required
-                    />
-                    <CFormInput
-                        label="Last Name"
-                        value={editingUser?.lastName || ''}
-                        onChange={(e) => setEditingUser({ ...editingUser, lastName: e.target.value })}
-                        className="mb-3"
-                        required
-                    />
-                    <CFormInput
-                        label="Email"
-                        value={editingUser?.email || ''}
-                        onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                        className="mb-3"
-                        required
-                    />
-                    <CFormInput
-                        label="Phone"
-                        value={editingUser?.phone || ''}
-                        onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
-                        className="mb-3"
-                        required
-                    />
-                    <CFormInput
-                        label="Address"
-                        value={editingUser?.address || ''}
-                        onChange={(e) => setEditingUser({ ...editingUser, address: e.target.value })}
-                        className="mb-3"
-                        required
-                    />
-                    <CFormSelect
-                        label="Role"
-                        value={editingUser?.role || ''}
-                        onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                        className="mb-3"
-                        required
-                    >
-                        <option value="administrador">Administrador</option>
-                        <option value="cliente">Cliente</option>
-                        <option value="empleado">Empleado</option>
-                    </CFormSelect>
-                    <CFormInput
-                        type="date"
-                        label="Registration Date"
-                        value={editingUser?.ClienteDateRegister || ''}
-                        onChange={(e) => setEditingUser({ ...editingUser, ClienteDateRegister: e.target.value })}
-                        className="mb-3"
-                        required
-                    />
-                    <div className="text-end">
-                        <CButton color="secondary" className="me-2" onClick={() => setVisibleModal(false)}>
-                            Cancelar
-                        </CButton>
-                        <CButton color="primary" type="submit">
-                            Guardar Cambios
-                        </CButton>
-                    </div>
-                </CForm>
-            </CModalBody>
+                <CButton color="primary" type="submit">
+                  Crear
+                </CButton>
+              </div>
+            </CForm>
+          </CModalBody>
         </CModal>
-        </CCardBody>
+
+        {/* Modal para editar usuario */}
+        <CModal visible={visibleEditModal} onClose={() => setVisibleEditModal(false)}>
+          <CModalHeader>
+            <CModalTitle>Modificar Usuario</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+            <CForm onSubmit={handleUpdate}>
+              <CFormInput
+                label="Usuario"
+                value={editingUser?.username || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Contraseña"
+                type="password"
+                value={editingUser?.password || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Nombre"
+                value={editingUser?.firstname || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, firstname: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Apellido"
+                value={editingUser?.lastname || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, lastname: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Email"
+                type="email"
+                value={editingUser?.email || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Teléfono"
+                value={editingUser?.phonenumber || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, phonenumber: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Dirección"
+                value={editingUser?.address || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, address: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Rol (idroll)"
+                type="number"
+                value={editingUser?.idroll || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, idroll: e.target.value })}
+                className="mb-3"
+                required
+              />
+              <CFormInput
+                label="Fecha de ingreso"
+                type="date"
+                value={editingUser?.fecha_ingresado?.slice(0, 10) || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, fecha_ingresado: e.target.value })}
+                className="mb-3"
+              />
+              <div className="text-end">
+                <CButton color="secondary" className="me-2" onClick={() => setVisibleEditModal(false)}>
+                  Cancelar
+                </CButton>
+                <CButton color="primary" type="submit">
+                  Guardar Cambios
+                </CButton>
+              </div>
+            </CForm>
+          </CModalBody>
+        </CModal>
+
+        {/* Modal de confirmación de eliminación */}
+        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+          <CModalHeader>
+            <CModalTitle>Confirmar eliminación</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+            ¿Estás seguro de que deseas eliminar al usuario <b>{deleteUser?.username}</b>?
+          </CModalBody>
+          <CModalFooter>
+            <CButton color="secondary" onClick={() => setShowDeleteModal(false)}>
+              Cancelar
+            </CButton>
+            <CButton color="danger" onClick={confirmDelete}>
+              Eliminar
+            </CButton>
+          </CModalFooter>
+        </CModal>
+
+        {/* Modal de confirmación de actualización */}
+        <CModal visible={showUpdateModal} onClose={() => setShowUpdateModal(false)}>
+          <CModalBody className="text-center">
+            <span className="fw-bold" style={{ color: 'var(--cui-primary)' }}>
+              ¡Usuario actualizado correctamente!
+            </span>
+          </CModalBody>
+        </CModal>
+      </CCardBody>
     </CCard>
-    );
-    };
+  );
+};
 
 export default Users;

@@ -1,4 +1,4 @@
-import { element } from 'prop-types'
+
 import React from 'react'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
@@ -6,7 +6,7 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 //const añadidos por mi
 const Services = React.lazy(() => import('./views/pages/services/Services'));
 const User = React.lazy (() => import('./views/pages/users/Users'));
-const Stock = React.lazy(() => import('./views/pages/stock/Stock'));
+const Employees = React.lazy(() => import('./views/pages/employees/Employees'));
 const AddAppointment = React.lazy(() => import('./views/pages/appointments/addAppointment/AddAppointment'));
 const AppointmentCalendar = React.lazy(() => import('./views/pages/appointments/appointmentCalendar/AppointmentCalendar'));
 
@@ -17,10 +17,10 @@ const routes = [
   //ruta añadida por mi
 
   { path: '/services', name: 'Services', element: Services },
-  { path: '/stock', name: 'Stock', element: Stock},
+  { path: '/employees', name: 'Employees', element: Employees},
   { path: '/appointments/add', element: AddAppointment},
   { path: '/appointments/calendar', element: AppointmentCalendar},
-  
+  { path: '/users', name: 'User', element: User}
 ]
 
 export default routes

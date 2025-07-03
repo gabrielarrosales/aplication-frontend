@@ -1,68 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import {
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CCol,
-  CRow,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
-  CBadge,
-  CProgress
+  CCard, CCardBody, CCardHeader, CCol, CRow, CTable, CTableBody, CTableDataCell,
+  CTableHead, CTableHeaderCell, CTableRow, CBadge, CProgress, CWidgetStatsA
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCalendar, cilShower, cilStar } from '@coreui/icons';
+import { cilUser, cilPeople, cilList, cilCalendar } from '@coreui/icons';
 
 const Dashboard = () => {
-
-  const [appointments, setAppointments] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [services, setServices] = useState([]);
+  const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-
-    setTimeout(() => {
-      
-      const mockAppointments = [
-        { id: 1, client: 'María García', service: 'Corte de cabello', date: '2024-05-20', time: '10:00' },
-        { id: 2, client: 'Juan Pérez', service: 'Coloración', date: '2024-05-21', time: '14:30' },
-        { id: 3, client: 'Ana López', service: 'Manicura', date: '2024-05-22', time: '16:00' }
-      ];
-
-    
-      const mockProducts = [
-        { id: 1, name: 'Shampoo Anticaspa', stock: 4, minStock: 5 },
-        { id: 2, name: 'Tinte Rubio', stock: 3, minStock: 5 },
-        { id: 3, name: 'Esmalte Rojo', stock: 10, minStock: 5 },
-        { id: 4, name: 'Crema Hidratante', stock: 2, minStock: 5 }
-      ];
-
-      
-      const mockServices = [
-        { id: 1, name: 'Corte de cabello', requests: 15 },
-        { id: 2, name: 'Coloración', requests: 8 },
-        { id: 3, name: 'Manicura', requests: 12 },
-        { id: 4, name: 'Pedicura', requests: 6 }
-      ];
-
-      setAppointments(mockAppointments);
-      setProducts(mockProducts);
-      setServices(mockServices);
+    setLoading(true);
+    Promise.all([
+      fetch('http://localhost:3001/users', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+      fetch('http://localhost:3001/employees', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+      fetch('http://localhost:3001/services', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+      fetch('http://localhost:3001/reservations', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+    ]).then(([usersData, employeesData, servicesData, reservationsData]) => {
+      setUsers(Array.isArray(usersData) ? usersData : []);
+      setEmployees(Array.isArray(employeesData) ? employeesData : []);
+      setServices(Array.isArray(servicesData) ? servicesData : []);
+      setReservations(Array.isArray(reservationsData) ? reservationsData : []);
       setLoading(false);
-    }, 1000);
-  }, []);
+    }).catch(() => setLoading(false));
+  }, [token]);
 
-  
-  const lowStockProducts = products.filter(product => product.stock < 5);
+const formatDateYMD = (dateStr) => {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '-';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
-  
-  const popularServices = [...services].sort((a, b) => b.requests - a.requests).slice(0, 3);
+  // Resumen de reservas por estado
+  const reservationStatus = reservations.reduce((acc, r) => {
+    acc[r.status] = (acc[r.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Últimos registros
+  const lastUsers = users.slice(-5).reverse();
+  const lastEmployees = employees.slice(-5).reverse();
+  const lastServices = services.slice(-5).reverse();
+  const lastReservations = reservations.slice(-5).reverse();
+
+  // Utilidades para mostrar nombres reales en reservas
+  const getClientName = (iduser) => {
+    const user = users.find(u => u.iduser === Number(iduser));
+    return user ? `${user.firstname} ${user.lastname}` : '-';
+  };
+
+  const getServiceName = (idservice) => {
+    const service = services.find(s => s.idservice === Number(idservice));
+    return service ? service.servicename : '-';
+  };
 
   if (loading) {
     return (
@@ -76,105 +76,174 @@ const Dashboard = () => {
 
   return (
     <div className="container-fluid p-4">
+      <h2 className="mb-4">Dashboard General</h2>
+      <CRow className="mb-4">
+        <CCol md={3}>
+          <CWidgetStatsA
+            color="primary"
+            value={users.length}
+            title="Usuarios"
+            icon={<CIcon icon={cilUser} height={36} />}
+          />
+        </CCol>
+        <CCol md={3}>
+          <CWidgetStatsA
+            color="info"
+            value={employees.length}
+            title="Empleados"
+            icon={<CIcon icon={cilPeople} height={36} />}
+          />
+        </CCol>
+        <CCol md={3}>
+          <CWidgetStatsA
+            color="success"
+            value={services.length}
+            title="Servicios"
+            icon={<CIcon icon={cilList} height={36} />}
+          />
+        </CCol>
+        <CCol md={3}>
+          <CWidgetStatsA
+            color="warning"
+            value={reservations.length}
+            title="Reservas"
+            icon={<CIcon icon={cilCalendar} height={36} />}
+          />
+        </CCol>
+      </CRow>
 
-      <h2 className="mb-4">Dashboard - Admin Beauty</h2>
-
-      
-      <CCard className="mb-4">
-        <CCardHeader>
-          <CIcon icon={cilCalendar} className="me-2" />
-          Citas Pendientes
-        </CCardHeader>
-        <CCardBody>
-          <CTable hover responsive>
-            <CTableHead>
-              <CTableRow>
-                <CTableHeaderCell>Cliente</CTableHeaderCell>
-                <CTableHeaderCell>Servicio</CTableHeaderCell>
-                <CTableHeaderCell>Fecha</CTableHeaderCell>
-                <CTableHeaderCell>Hora</CTableHeaderCell>
-              </CTableRow>
-            </CTableHead>
-            <CTableBody>
-              {appointments.map(appointment => (
-                <CTableRow key={appointment.id}>
-                  <CTableDataCell>{appointment.client}</CTableDataCell>
-                  <CTableDataCell>{appointment.service}</CTableDataCell>
-                  <CTableDataCell>{appointment.date}</CTableDataCell>
-                  <CTableDataCell>{appointment.time}</CTableDataCell>
-                </CTableRow>
-              ))}
-            </CTableBody>
-          </CTable>
-        </CCardBody>
-      </CCard>
-
-      
-      <CCard className="mb-4">
-        <CCardHeader>
-          <CIcon icon={cilShower} className="me-2" />
-          Productos con Bajo Stock menores a 5 unidades
-        </CCardHeader>
-        <CCardBody>
-          {lowStockProducts.length > 0 ? (
-            <CTable hover responsive>
-              <CTableHead>
-                <CTableRow>
-                  <CTableHeaderCell>Producto</CTableHeaderCell>
-                  <CTableHeaderCell>Unidades</CTableHeaderCell>
-                  <CTableHeaderCell>Estado</CTableHeaderCell>
-                </CTableRow>
-              </CTableHead>
-              <CTableBody>
-                {lowStockProducts.map(product => (
-                  <CTableRow key={product.id}>
-                    <CTableDataCell>{product.name}</CTableDataCell>
-                    <CTableDataCell>{product.stock}</CTableDataCell>
-                    <CTableDataCell>
-                      <CBadge color="danger">Reabastecer</CBadge>
-                    </CTableDataCell>
+      <CRow className="mb-4">
+        <CCol md={6}>
+          <CCard>
+            <CCardHeader>Últimos Usuarios</CCardHeader>
+            <CCardBody>
+              <CTable hover responsive>
+                <CTableHead>
+                  <CTableRow>
+                    <CTableHeaderCell>Usuario</CTableHeaderCell>
+                    <CTableHeaderCell>Nombre</CTableHeaderCell>
+                    <CTableHeaderCell>Email</CTableHeaderCell>
                   </CTableRow>
-                ))}
-              </CTableBody>
-            </CTable>
-          ) : (
-            <div className="text-center text-success">
-              <p>¡Todos los productos tienen stock suficiente!</p>
-            </div>
-          )}
-        </CCardBody>
-      </CCard>
+                </CTableHead>
+                <CTableBody>
+                  {lastUsers.map(u => (
+                    <CTableRow key={u.iduser}>
+                      <CTableDataCell>{u.username}</CTableDataCell>
+                      <CTableDataCell>{u.firstname} {u.lastname}</CTableDataCell>
+                      <CTableDataCell>{u.email}</CTableDataCell>
+                    </CTableRow>
+                  ))}
+                </CTableBody>
+              </CTable>
+            </CCardBody>
+          </CCard>
+        </CCol>
+        <CCol md={6}>
+          <CCard>
+            <CCardHeader>Últimos Empleados</CCardHeader>
+            <CCardBody>
+              <CTable hover responsive>
+                <CTableHead>
+                  <CTableRow>
+                    <CTableHeaderCell>Nombre</CTableHeaderCell>
+                    <CTableHeaderCell>Especialidad</CTableHeaderCell>
+                    <CTableHeaderCell>Email</CTableHeaderCell>
+                  </CTableRow>
+                </CTableHead>
+                <CTableBody>
+                  {lastEmployees.map(e => (
+                    <CTableRow key={e.idemployee}>
+                      <CTableDataCell>{e.firstname} {e.lastname}</CTableDataCell>
+                      <CTableDataCell>{e.specialty}</CTableDataCell>
+                      <CTableDataCell>{e.email}</CTableDataCell>
+                    </CTableRow>
+                  ))}
+                </CTableBody>
+              </CTable>
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
 
-    
-      <CCard className="mb-4">
-        <CCardHeader>
-          <CIcon icon={cilStar} className="me-2" />
-          Servicios Más Solicitados
-        </CCardHeader>
+      <CRow className="mb-4">
+        <CCol md={6}>
+          <CCard>
+            <CCardHeader>Últimos Servicios</CCardHeader>
+            <CCardBody>
+              <CTable hover responsive>
+                <CTableHead>
+                  <CTableRow>
+                    <CTableHeaderCell>Servicio</CTableHeaderCell>
+                    <CTableHeaderCell>Categoría</CTableHeaderCell>
+                    <CTableHeaderCell>Precio</CTableHeaderCell>
+                  </CTableRow>
+                </CTableHead>
+                <CTableBody>
+                  {lastServices.map(s => (
+                    <CTableRow key={s.idservice}>
+                      <CTableDataCell>{s.servicename}</CTableDataCell>
+                      <CTableDataCell>{s.idcategory}</CTableDataCell>
+                      <CTableDataCell>{s.price}</CTableDataCell>
+                    </CTableRow>
+                  ))}
+                </CTableBody>
+              </CTable>
+            </CCardBody>
+          </CCard>
+        </CCol>
+        <CCol md={6}>
+          <CCard>
+            <CCardHeader>Últimas Reservas</CCardHeader>
+            <CCardBody>
+              <CTable hover responsive>
+                <CTableHead>
+                  <CTableRow>
+                    <CTableHeaderCell>Cliente</CTableHeaderCell>
+                    <CTableHeaderCell>Servicio</CTableHeaderCell>
+                    <CTableHeaderCell>Fecha</CTableHeaderCell>
+                    <CTableHeaderCell>Estado</CTableHeaderCell>
+                  </CTableRow>
+                </CTableHead>
+                <CTableBody>
+                  {lastReservations.map(r => (
+                    <CTableRow key={r.idreservation}>
+                      <CTableDataCell>{getClientName(r.iduser)}</CTableDataCell>
+                      <CTableDataCell>{getServiceName(r.idservice)}</CTableDataCell>
+                      <CTableDataCell>{formatDateYMD(r.date || r.fecha)}</CTableDataCell>
+                      <CTableDataCell>
+                        <CBadge color={
+                          r.status === 'pendiente' ? 'warning' :
+                          r.status === 'completada' ? 'success' :
+                          r.status === 'cancelada' ? 'danger' : 'secondary'
+                        }>
+                          {r.status}
+                        </CBadge>
+                      </CTableDataCell>
+                    </CTableRow>
+                  ))}
+                </CTableBody>
+              </CTable>
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
+
+      <CCard>
+        <CCardHeader>Resumen de Reservas por Estado</CCardHeader>
         <CCardBody>
-          <CTable hover responsive>
-            <CTableHead>
-              <CTableRow>
-                <CTableHeaderCell>Servicio</CTableHeaderCell>
-                <CTableHeaderCell>Solicitudes</CTableHeaderCell>
-                <CTableHeaderCell>Popularidad</CTableHeaderCell>
-              </CTableRow>
-            </CTableHead>
-            <CTableBody>
-              {popularServices.map(service => (
-                <CTableRow key={service.id}>
-                  <CTableDataCell>{service.name}</CTableDataCell>
-                  <CTableDataCell>{service.requests}</CTableDataCell>
-                  <CTableDataCell>
-                    <CProgress 
-                      color={service.requests > 10 ? 'success' : service.requests > 5 ? 'warning' : 'info'}
-                      value={(service.requests / popularServices[0].requests) * 100}
-                    />
-                  </CTableDataCell>
-                </CTableRow>
-              ))}
-            </CTableBody>
-          </CTable>
+          <CRow>
+            {Object.entries(reservationStatus).map(([status, count]) => (
+              <CCol md={3} key={status}>
+                <h6>{status.charAt(0).toUpperCase() + status.slice(1)}</h6>
+                <CProgress value={count} max={reservations.length} color={
+                  status === 'pendiente' ? 'warning' :
+                  status === 'completada' ? 'success' :
+                  status === 'cancelada' ? 'danger' : 'info'
+                } className="mb-2" />
+                <span>{count} reserva(s)</span>
+              </CCol>
+            ))}
+          </CRow>
         </CCardBody>
       </CCard>
     </div>

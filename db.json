@@ -131,5 +131,51 @@
       "duration": "00:30:00",
       "price": 15
     }
+  ],
+  "employees": [
+    {
+      "id": 1,
+      "firstname": "María",
+      "lastname": "García",
+      "address": "Calle Bolívar, Valencia",
+      "phonenumber": "04243334455",
+      "specialty": "Estilista",
+      "username": "mariagarcia",
+      "password": "123456",
+      "email": "maria@gmail.com"
+    },
+    {
+      "id": 2,
+      "firstname": "Ana",
+      "lastname": "Perez",
+      "address": "Av. Libertador",
+      "phonenumber": "04127787813",
+      "specialty": "Colorista",
+      "username": "anaperez",
+      "password": "abcdef",
+      "email": "ana@gmail.com"
+    },
+    {
+      "id": "472f",
+      "firstname": "alejandrita",
+      "lastname": "rosales",
+      "address": "torres blancas",
+      "phonenumber": "04127787813",
+      "specialty": "manicurista",
+      "username": "gabriela3",
+      "password": "123456",
+      "email": "gaby@gmail.com"
+    },
+    {
+      "id": "4697",
+      "firstname": "cesarititito",
+      "lastname": "rosalito",
+      "address": "torres blanquitas",
+      "phonenumber": "02763437844",
+      "specialty": "barberito",
+      "username": "cesario123",
+      "password": "123456",
+      "email": "cesarito@gmail.com"
+    }
   ]
 }

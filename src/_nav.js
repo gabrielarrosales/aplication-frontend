@@ -45,8 +45,8 @@ const _nav = [
 
   {
     component: CNavItem,
-    name: 'STOCK',
-    to: '/stock', 
+    name: 'EMPLOYEES',
+    to: '/employees', 
     icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />, 
   },
 
